@@ -1,15 +1,14 @@
 package v2action
 
-type RouterGroups []RouterGroup
+import (
+	"errors"
 
-type RouterGroup {
-	GUID string
-}
+	"code.cloudfoundry.org/cli/api/router"
+)
 
-func (actor Actor) GetRouterGroups() (RouterGroups, error) {
-	clientRouterGroups, warnings, err := actor.RouterClient.GetRouterGroups()
-	if err != nil {
-		return nil, err
-	}
-	return RouterGroups(clientRouterGroups), err
+type RouterGroup router.RouterGroup
+
+func (actor Actor) GetRouterGroupByName(routerGroupName string, client RouterClient) (RouterGroup, error) {
+	client.GetRouterGroups()
+	return RouterGroup{}, errors.New("Not a real router group")
 }

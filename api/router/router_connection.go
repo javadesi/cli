@@ -93,7 +93,7 @@ func (connection *RouterConnection) populateResponse(response *http.Response, pa
 
 	err = connection.handleStatusCodes(response, passedResponse)
 	if err != nil {
-		return errConfig
+		return err // TODO errConfig
 	}
 
 	if passedResponse.Result != nil {

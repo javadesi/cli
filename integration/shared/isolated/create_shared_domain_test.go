@@ -162,7 +162,7 @@ var _ = Describe("create-shared-domain command", func() {
 		})
 	})
 
-	When("user is not logged in as admin", func() {
+	FWhen("user is not logged in as admin", func() {
 		var (
 			username string
 			password string

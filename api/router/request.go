@@ -55,7 +55,7 @@ func (client Client) newHTTPRequest(passedRequest requestOptions) (*cloudcontrol
 			return nil, err
 		}
 
-		base, err = url.Parse(client.API())
+		base, err = url.Parse("") // client.API()
 		if err != nil {
 			return nil, err
 		}

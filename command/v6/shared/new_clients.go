@@ -3,6 +3,7 @@ package shared
 import (
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv2"
 	ccWrapper "code.cloudfoundry.org/cli/api/cloudcontroller/wrapper"
+	"code.cloudfoundry.org/cli/api/router"
 	"code.cloudfoundry.org/cli/api/uaa"
 	uaaWrapper "code.cloudfoundry.org/cli/api/uaa/wrapper"
 	"code.cloudfoundry.org/cli/command"
@@ -85,4 +86,15 @@ func NewClients(config command.Config, ui command.UI, targetCF bool) (*ccv2.Clie
 	authWrapper.SetClient(uaaClient)
 
 	return ccClient, uaaClient, err
+}
+
+func NewRouterClient(config command.Config, ui command.UI) (*router.Client, error) {
+	routerConfig := router.Config{
+		AppName:    config.BinaryName(),
+		AppVersion: config.BinaryVersion(),
+	}
+
+	routerClient := router.NewClient(routerConfig)
+
+	return routerClient, nil
 }

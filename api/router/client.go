@@ -19,8 +19,8 @@ type Client struct {
 	wrappers   []ConnectionWrapper
 }
 
-// ClientConfig allows the Client to be configured
-type ClientConfig struct {
+// Config allows the Client to be configured
+type Config struct {
 	// AppName is the name of the application/process using the client.
 	AppName string
 
@@ -32,7 +32,7 @@ type ClientConfig struct {
 }
 
 // NewClient returns a new Router Client.
-func NewClient(config ClientConfig) *Client {
+func NewClient(config Config) *Client {
 	userAgent := fmt.Sprintf("%s/%s (%s; %s %s)",
 		config.AppName,
 		config.AppVersion,
