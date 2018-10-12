@@ -9,16 +9,18 @@ type Actor struct {
 	CloudControllerClient CloudControllerClient
 	Config                Config
 	UAAClient             UAAClient
+	RouterClient          RouterClient
 
 	domainCache map[string]Domain
 }
 
 // NewActor returns a new actor.
-func NewActor(ccClient CloudControllerClient, uaaClient UAAClient, config Config) *Actor {
+func NewActor(ccClient CloudControllerClient, uaaClient UAAClient, routerClient RouterClient, config Config) *Actor {
 	return &Actor{
 		CloudControllerClient: ccClient,
 		Config:                config,
 		UAAClient:             uaaClient,
+		RouterClient:          routerClient,
 		domainCache:           map[string]Domain{},
 	}
 }
