@@ -1,6 +1,9 @@
 package ccv2
 
 import (
+	"bytes"
+	"encoding/json"
+
 	"code.cloudfoundry.org/cli/api/cloudcontroller"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv2/constant"
@@ -53,6 +56,30 @@ func (domain *Domain) UnmarshalJSON(data []byte) error {
 	domain.RouterGroupType = constant.RouterGroupType(ccDomain.Entity.RouterGroupType)
 	domain.Internal = ccDomain.Entity.Internal
 	return nil
+}
+
+type createSharedDomainBody struct {
+	Name string `json:"name"`
+}
+
+func (client *Client) CreateSharedDomain(domainName string, routerGroupdGUID string) (Warnings, error) {
+	body := createSharedDomainBody{
+		Name: domainName,
+	}
+	bodyBytes, err := json.Marshal(body)
+	request, err := client.newHTTPRequest(requestOptions{
+		RequestName: internal.PostSharedDomainRequest,
+		Body:        bytes.NewReader(bodyBytes),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	var response cloudcontroller.Response
+
+	err = client.connection.Make(request, &response)
+	return response.Warnings, err
 }
 
 // GetOrganizationPrivateDomains returns the private domains associated with an organization.

@@ -1,6 +1,7 @@
 package ccv2_test
 
 import (
+	"fmt"
 	"net/http"
 
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
@@ -16,6 +17,37 @@ var _ = Describe("Domain", func() {
 
 	BeforeEach(func() {
 		client = NewTestClient()
+	})
+
+	Describe("CreateSharedDomain", func() {
+		var domain string
+		When("no errors are encountered", func() {
+
+		})
+
+		When("the API returns an unauthorized error", func() {
+			BeforeEach(func() {
+				response := `{
+											"description": "You are not authorized to perform the requested action",
+											"error_code": "CF-NotAuthorized",
+											"code": 10003
+										}`
+				domain = "some-domain-name.com"
+				body := fmt.Sprintf(`{"name":"%s"}`, domain)
+				server.AppendHandlers(
+					CombineHandlers(
+						VerifyRequest(http.MethodPost, "/v2/shared_domains"),
+						VerifyBody([]byte(body)),
+						RespondWith(http.StatusForbidden, response, http.Header{"X-Cf-Warnings": {"this is your final warning"}}),
+					))
+			})
+
+			It("should return the error and all warnings", func() {
+				warnings, err := client.CreateSharedDomain(domain, "")
+				Expect(warnings).To(ConsistOf("this is your final warning"))
+				Expect(err).To(MatchError(ccerror.ForbiddenError{Message: "You are not authorized to perform the requested action"}))
+			})
+		})
 	})
 
 	Describe("GetSharedDomain", func() {

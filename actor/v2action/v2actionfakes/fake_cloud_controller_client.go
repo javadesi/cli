@@ -154,6 +154,20 @@ type FakeCloudControllerClient struct {
 		result2 ccv2.Warnings
 		result3 error
 	}
+	CreateSharedDomainStub        func(domainName string, routerGroupGUID string) (ccv2.Warnings, error)
+	createSharedDomainMutex       sync.RWMutex
+	createSharedDomainArgsForCall []struct {
+		domainName      string
+		routerGroupGUID string
+	}
+	createSharedDomainReturns struct {
+		result1 ccv2.Warnings
+		result2 error
+	}
+	createSharedDomainReturnsOnCall map[int]struct {
+		result1 ccv2.Warnings
+		result2 error
+	}
 	DeleteOrganizationJobStub        func(orgGUID string) (ccv2.Job, ccv2.Warnings, error)
 	deleteOrganizationJobMutex       sync.RWMutex
 	deleteOrganizationJobArgsForCall []struct {
@@ -1773,6 +1787,58 @@ func (fake *FakeCloudControllerClient) CreateUserReturnsOnCall(i int, result1 cc
 		result2 ccv2.Warnings
 		result3 error
 	}{result1, result2, result3}
+}
+
+func (fake *FakeCloudControllerClient) CreateSharedDomain(domainName string, routerGroupGUID string) (ccv2.Warnings, error) {
+	fake.createSharedDomainMutex.Lock()
+	ret, specificReturn := fake.createSharedDomainReturnsOnCall[len(fake.createSharedDomainArgsForCall)]
+	fake.createSharedDomainArgsForCall = append(fake.createSharedDomainArgsForCall, struct {
+		domainName      string
+		routerGroupGUID string
+	}{domainName, routerGroupGUID})
+	fake.recordInvocation("CreateSharedDomain", []interface{}{domainName, routerGroupGUID})
+	fake.createSharedDomainMutex.Unlock()
+	if fake.CreateSharedDomainStub != nil {
+		return fake.CreateSharedDomainStub(domainName, routerGroupGUID)
+	}
+	if specificReturn {
+		return ret.result1, ret.result2
+	}
+	return fake.createSharedDomainReturns.result1, fake.createSharedDomainReturns.result2
+}
+
+func (fake *FakeCloudControllerClient) CreateSharedDomainCallCount() int {
+	fake.createSharedDomainMutex.RLock()
+	defer fake.createSharedDomainMutex.RUnlock()
+	return len(fake.createSharedDomainArgsForCall)
+}
+
+func (fake *FakeCloudControllerClient) CreateSharedDomainArgsForCall(i int) (string, string) {
+	fake.createSharedDomainMutex.RLock()
+	defer fake.createSharedDomainMutex.RUnlock()
+	return fake.createSharedDomainArgsForCall[i].domainName, fake.createSharedDomainArgsForCall[i].routerGroupGUID
+}
+
+func (fake *FakeCloudControllerClient) CreateSharedDomainReturns(result1 ccv2.Warnings, result2 error) {
+	fake.CreateSharedDomainStub = nil
+	fake.createSharedDomainReturns = struct {
+		result1 ccv2.Warnings
+		result2 error
+	}{result1, result2}
+}
+
+func (fake *FakeCloudControllerClient) CreateSharedDomainReturnsOnCall(i int, result1 ccv2.Warnings, result2 error) {
+	fake.CreateSharedDomainStub = nil
+	if fake.createSharedDomainReturnsOnCall == nil {
+		fake.createSharedDomainReturnsOnCall = make(map[int]struct {
+			result1 ccv2.Warnings
+			result2 error
+		})
+	}
+	fake.createSharedDomainReturnsOnCall[i] = struct {
+		result1 ccv2.Warnings
+		result2 error
+	}{result1, result2}
 }
 
 func (fake *FakeCloudControllerClient) DeleteOrganizationJob(orgGUID string) (ccv2.Job, ccv2.Warnings, error) {
@@ -5890,6 +5956,8 @@ func (fake *FakeCloudControllerClient) Invocations() map[string][][]interface{} 
 	defer fake.createSpaceMutex.RUnlock()
 	fake.createUserMutex.RLock()
 	defer fake.createUserMutex.RUnlock()
+	fake.createSharedDomainMutex.RLock()
+	defer fake.createSharedDomainMutex.RUnlock()
 	fake.deleteOrganizationJobMutex.RLock()
 	defer fake.deleteOrganizationJobMutex.RUnlock()
 	fake.deleteRouteMutex.RLock()

@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = FDescribe("Router Group Actions", func() {
+var _ = Describe("Router Group Actions", func() {
 	var (
 		actor                     *Actor
 		fakeCloudControllerClient = new(v2actionfakes.FakeCloudControllerClient)

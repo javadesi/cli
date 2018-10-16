@@ -10,7 +10,7 @@ import (
 	. "github.com/onsi/gomega/ghttp"
 )
 
-var _ = FDescribe("Router Groups", func() {
+var _ = Describe("Router Groups", func() {
 	Describe("GetRouterGroups", func() {
 		var (
 			client       *Client

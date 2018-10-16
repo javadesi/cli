@@ -41,12 +41,6 @@ var _ = FDescribe("create-shared-domain command", func() {
 	})
 
 	When("user is logged in as admin", func() {
-		AfterEach(func() {
-			session := helpers.CF("delete-shared-domain", domainName, "-f")
-			Eventually(session).Should(Exit(0))
-			helpers.QuickDeleteOrg(orgName)
-		})
-
 		When("No optional flags are specified", func() {
 			When("domain name is valid", func() {
 				It("should create the shared domain", func() {
@@ -71,7 +65,7 @@ var _ = FDescribe("create-shared-domain command", func() {
 
 					Eventually(session).Should(Say("Creating shared domain %s as admin...", regexp.QuoteMeta(domainName)))
 					Eventually(session).Should(Say("FAILED"))
-					Eventually(session).Should(Say(regexp.QuoteMeta("Server error, status code: 400, error code: 130001, message: The domain is invalid: name can contain multiple subdomains, each having only alphanumeric characters and hyphens of up to 63 characters, see RFC 1035.")))
+					Eventually(session.Err).Should(Say(regexp.QuoteMeta("The domain is invalid: name can contain multiple subdomains, each having only alphanumeric characters and hyphens of up to 63 characters, see RFC 1035.")))
 					Eventually(session).Should(Exit(1))
 				})
 			})
@@ -86,7 +80,7 @@ var _ = FDescribe("create-shared-domain command", func() {
 					session := helpers.CF("create-shared-domain", domainName)
 					Eventually(session).Should(Say("Creating shared domain %s as admin...", domainName))
 					Eventually(session).Should(Say("FAILED"))
-					Eventually(session).Should(Say("Server error, status code: 400, error code: 130003, message: The domain name is taken: %s", domainName))
+					Eventually(session.Err).Should(Say("The domain name is taken: %s", domainName))
 					Eventually(session).Should(Exit(1))
 				})
 			})
@@ -155,14 +149,14 @@ var _ = FDescribe("create-shared-domain command", func() {
 				It("should fail and return an error", func() {
 					session := helpers.CF("create-shared-domain", domainName, "--router-group", routerGroupName)
 					Eventually(session).Should(Say("FAILED"))
-					Eventually(session).Should(Say("Router group not-a-real-router-group not found"))
+					Eventually(session.Err).Should(Say("Router group not-a-real-router-group not found"))
 					Eventually(session).Should(Exit(1))
 				})
 			})
 		})
 	})
 
-	FWhen("user is not logged in as admin", func() {
+	When("user is not logged in as admin", func() {
 		var (
 			username string
 			password string
@@ -178,7 +172,7 @@ var _ = FDescribe("create-shared-domain command", func() {
 			session := helpers.CF("create-shared-domain", domainName)
 			Eventually(session).Should(Say(fmt.Sprintf("Creating shared domain %s as %s...", domainName, username)))
 			Eventually(session).Should(Say("FAILED"))
-			Eventually(session).Should(Say("Server error, status code: 403, error code: 10003, message: You are not authorized to perform the requested action"))
+			Eventually(session.Err).Should(Say("You are not authorized to perform the requested action"))
 			Eventually(session).Should(Exit(1))
 		})
 	})

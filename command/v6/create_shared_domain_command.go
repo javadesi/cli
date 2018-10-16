@@ -11,6 +11,7 @@ import (
 //go:generate counterfeiter . CreateSharedDomainActor
 type CreateSharedDomainActor interface {
 	GetRouterGroupByName(string, v2action.RouterClient) (v2action.RouterGroup, error)
+	CreateSharedDomain(string, v2action.RouterGroup) (v2action.Warnings, error)
 }
 
 type CreateSharedDomainCommand struct {
@@ -53,12 +54,23 @@ func (cmd CreateSharedDomainCommand) Execute(args []string) error {
 	if err != nil {
 		return err
 	}
+
+	var routerGroup v2action.RouterGroup
+
 	if cmd.RouterGroup != "" {
-		_, routerGroupErr := cmd.Actor.GetRouterGroupByName("", cmd.RouterClient)
+		rg, routerGroupErr := cmd.Actor.GetRouterGroupByName(cmd.RouterGroup, cmd.RouterClient)
 		if routerGroupErr != nil {
 			return routerGroupErr
 		}
+		routerGroup = rg
 	}
 
+	warnings, err := cmd.Actor.CreateSharedDomain(cmd.RequiredArgs.Domain, routerGroup)
+	cmd.UI.DisplayWarnings(warnings)
+
+	if err != nil {
+		return err
+	}
+	cmd.UI.DisplayOK()
 	return nil
 }
