@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/gomega/gexec"
 )
 
-var _ = Describe("create-shared-domain command", func() {
+var _ = FDescribe("create-shared-domain command", func() {
 	Context("Help", func() {
 		It("displays the help information", func() {
 			session := helpers.CF("create-shared-domain", "--help")
@@ -27,20 +27,20 @@ var _ = Describe("create-shared-domain command", func() {
 		})
 	})
 
+	var (
+		orgName    string
+		spaceName  string
+		domainName string
+	)
+
+	BeforeEach(func() {
+		orgName = helpers.NewOrgName()
+		spaceName = helpers.NewSpaceName()
+		helpers.SetupCF(orgName, spaceName)
+		domainName = helpers.NewDomainName()
+	})
+
 	When("user is logged in as admin", func() {
-		var (
-			orgName    string
-			spaceName  string
-			domainName string
-		)
-
-		BeforeEach(func() {
-			orgName = helpers.NewOrgName()
-			spaceName = helpers.NewSpaceName()
-			helpers.SetupCF(orgName, spaceName)
-			domainName = helpers.NewDomainName()
-		})
-
 		AfterEach(func() {
 			session := helpers.CF("delete-shared-domain", domainName, "-f")
 			Eventually(session).Should(Exit(0))
@@ -175,8 +175,8 @@ var _ = Describe("create-shared-domain command", func() {
 		})
 
 		It("should not be able to create shared domain", func() {
-			session := helpers.CF("create-shared-domain", "some-domain-name.com")
-			Eventually(session).Should(Say(fmt.Sprintf("Creating shared domain some-domain-name.com as %s...", username)))
+			session := helpers.CF("create-shared-domain", domainName)
+			Eventually(session).Should(Say(fmt.Sprintf("Creating shared domain %s as %s...", domainName, username)))
 			Eventually(session).Should(Say("FAILED"))
 			Eventually(session).Should(Say("Server error, status code: 403, error code: 10003, message: You are not authorized to perform the requested action"))
 			Eventually(session).Should(Exit(1))

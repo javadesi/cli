@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
+	"code.cloudfoundry.org/cli/api/router/routererror"
 )
 
 // ConnectionConfig is for configuring the RouterConnection
@@ -25,7 +26,7 @@ type RouterConnection struct {
 	HTTPClient *http.Client
 }
 
-// NewConnection returns a pointer to a new UAA Connection with the provided configuration
+// NewConnection returns a pointer to a new RouterConnection with the provided configuration
 func NewConnection(config ConnectionConfig) *RouterConnection {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
@@ -44,62 +45,59 @@ func NewConnection(config ConnectionConfig) *RouterConnection {
 }
 
 // Make performs the request and parses the response.
-func (connection *RouterConnection) Make(request *Request, passedResponse *Response) error {
+func (connection *RouterConnection) Make(request *Request, responseToPopulate *Response) error {
 	// In case this function is called from a retry, passedResponse may already
 	// be populated with a previous response. We reset in case there's an HTTP
 	// error and we don't repopulate it in populateResponse.
-	passedResponse.reset()
+	responseToPopulate.reset()
 
-	response, err := connection.HTTPClient.Do(request.Request)
+	httpResponse, err := connection.HTTPClient.Do(request.Request)
 	if err != nil {
+		// request could not be made, e.g., ssl handshake or tcp dial timeout
+		// TODO: check on this
 		return connection.processRequestErrors(request.Request, err)
 	}
 
-	return connection.populateResponse(response, passedResponse)
+	return connection.populateResponse(httpResponse, responseToPopulate)
 }
 
-func (*RouterConnection) handleStatusCodes(response *http.Response, passedResponse *Response) error {
-	if response.StatusCode == http.StatusNoContent {
-		passedResponse.RawResponse = []byte("{}")
-	} else {
-		rawBytes, err := ioutil.ReadAll(response.Body)
-		defer response.Body.Close()
+func (*RouterConnection) handleStatusCodes(httpResponse *http.Response, responseToPopulate *Response) error {
+	if httpResponse.StatusCode >= 400 {
+		var errorResponse routererror.ErrorResponse
+		err := json.Unmarshal(responseToPopulate.RawResponse, &errorResponse)
 		if err != nil {
-			return err
+			return routererror.RawHTTPStatusError{
+				StatusCode:  httpResponse.StatusCode,
+				RawResponse: responseToPopulate.RawResponse,
+			}
 		}
+		errorResponse.StatusCode = httpResponse.StatusCode
 
-		passedResponse.RawResponse = rawBytes
-	}
-
-	if response.StatusCode >= 400 {
-		return ccerror.RawHTTPStatusError{
-			StatusCode:  response.StatusCode,
-			RawResponse: passedResponse.RawResponse,
-			RequestIDs:  response.Header["X-Vcap-Request-Id"],
-		}
+		return errorResponse
 	}
 
 	return nil
 }
-func (connection *RouterConnection) populateResponse(response *http.Response, passedResponse *Response) error {
-	passedResponse.HTTPResponse = response
 
-	rawBytes, err := ioutil.ReadAll(response.Body)
-	defer response.Body.Close()
+func (connection *RouterConnection) populateResponse(httpResponse *http.Response, responseToPopulate *Response) error {
+	responseToPopulate.HTTPResponse = httpResponse
+
+	rawBytes, err := ioutil.ReadAll(httpResponse.Body)
+	defer httpResponse.Body.Close()
 	if err != nil {
 		return err
 	}
-	passedResponse.RawResponse = rawBytes
+	responseToPopulate.RawResponse = rawBytes
 
-	err = connection.handleStatusCodes(response, passedResponse)
+	err = connection.handleStatusCodes(httpResponse, responseToPopulate)
 	if err != nil {
 		return err // TODO errConfig
 	}
 
-	if passedResponse.Result != nil {
-		decoder := json.NewDecoder(bytes.NewBuffer(passedResponse.RawResponse))
+	if responseToPopulate.Result != nil {
+		decoder := json.NewDecoder(bytes.NewBuffer(responseToPopulate.RawResponse))
 		decoder.UseNumber()
-		err = decoder.Decode(passedResponse.Result)
+		err = decoder.Decode(responseToPopulate.Result)
 		if err != nil {
 			return err
 		}

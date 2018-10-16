@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"time"
 
+	"code.cloudfoundry.org/cli/api/uaa"
 	"code.cloudfoundry.org/cli/command/commandfakes"
 	"code.cloudfoundry.org/cli/command/translatableerror"
 	. "code.cloudfoundry.org/cli/command/v6/shared"
@@ -18,14 +19,16 @@ import (
 
 var _ = Describe("New Clients", func() {
 	var (
-		binaryName string
-		fakeConfig *commandfakes.FakeConfig
-		testUI     *ui.UI
+		binaryName    string
+		fakeConfig    *commandfakes.FakeConfig
+		testUI        *ui.UI
+		fakeUaaClient *uaa.Client
 	)
 
 	BeforeEach(func() {
 		binaryName = "faceman"
 		fakeConfig = new(commandfakes.FakeConfig)
+		fakeUaaClient = &uaa.Client{}
 		testUI = ui.NewTestUI(NewBuffer(), NewBuffer(), NewBuffer())
 
 		fakeConfig.BinaryNameReturns(binaryName)
@@ -107,15 +110,20 @@ var _ = Describe("New Clients", func() {
 
 	Describe("NewRouterClient", func() {
 		It("should return a new router client", func() {
-			routerClient, err := NewRouterClient(fakeConfig, testUI)
+			routerClient, err := NewRouterClient(fakeConfig, testUI, fakeUaaClient)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(routerClient).ToNot(BeNil())
 		})
 
 		It("reads the app name and app version for its own config", func() {
-			_, _ = NewRouterClient(fakeConfig, testUI)
+			_, _ = NewRouterClient(fakeConfig, testUI, fakeUaaClient)
 			Expect(fakeConfig.BinaryNameCallCount()).To(Equal(1))
 			Expect(fakeConfig.BinaryVersionCallCount()).To(Equal(1))
+		})
+
+		XIt("should add a wrapper for the uaa client", func() {
+			// routerClient, err := NewRouterClient(fakeConfig, testUI, fakeUaaClient)
+			Expect(true).To(BeFalse())
 		})
 	})
 

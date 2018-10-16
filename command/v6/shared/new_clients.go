@@ -4,6 +4,7 @@ import (
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv2"
 	ccWrapper "code.cloudfoundry.org/cli/api/cloudcontroller/wrapper"
 	"code.cloudfoundry.org/cli/api/router"
+	routerWrapper "code.cloudfoundry.org/cli/api/router/wrapper"
 	"code.cloudfoundry.org/cli/api/uaa"
 	uaaWrapper "code.cloudfoundry.org/cli/api/uaa/wrapper"
 	"code.cloudfoundry.org/cli/command"
@@ -88,13 +89,27 @@ func NewClients(config command.Config, ui command.UI, targetCF bool) (*ccv2.Clie
 	return ccClient, uaaClient, err
 }
 
-func NewRouterClient(config command.Config, ui command.UI) (*router.Client, error) {
+func NewRouterClient(config command.Config, ui command.UI, uaaClient *uaa.Client) (*router.Client, error) {
 	routerConfig := router.Config{
 		AppName:    config.BinaryName(),
 		AppVersion: config.BinaryVersion(),
 	}
 
-	routerClient := router.NewClient(routerConfig)
+	routerWrappers := []router.ConnectionWrapper{}
 
+	authWrapper := routerWrapper.NewUAAAuthentication(nil, config)
+
+	routerWrappers = append(routerWrappers, authWrapper)
+
+	routerClient := router.NewClient(routerConfig, routerWrappers)
+	err := routerClient.SetupResources(config.RoutingEndpoint(), router.ConnectionConfig{
+		SkipSSLValidation: config.SkipSSLValidation(),
+		DialTimeout:       config.DialTimeout(),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	authWrapper.SetClient(uaaClient)
 	return routerClient, nil
 }

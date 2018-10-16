@@ -1,7 +1,7 @@
 package v2action
 
 import (
-	"errors"
+	"code.cloudfoundry.org/cli/actor/actionerror"
 
 	"code.cloudfoundry.org/cli/api/router"
 )
@@ -9,6 +9,15 @@ import (
 type RouterGroup router.RouterGroup
 
 func (actor Actor) GetRouterGroupByName(routerGroupName string, client RouterClient) (RouterGroup, error) {
-	client.GetRouterGroups()
-	return RouterGroup{}, errors.New("Not a real router group")
+	routerGroups, err := client.GetRouterGroups()
+	if err != nil {
+		return RouterGroup{}, err
+	}
+
+	for _, routerGroup := range routerGroups {
+		if routerGroup.Name == routerGroupName {
+			return RouterGroup(routerGroup), nil
+		}
+	}
+	return RouterGroup{}, actionerror.RouterGroupNotFoundError{Name: routerGroupName}
 }

@@ -6,21 +6,26 @@ import (
 
 // RouterGroup represents router group
 type RouterGroup struct {
-	GUID string `json:"guid"`
-	Name string `json:"name"`
+	GUID            string `json:"guid"`
+	Name            string `json:"name"`
+	Type            string `json:"type"`
+	ReservablePorts string `json:"reservable_ports"`
 }
 
 // GetRouterGroups returns a list of RouterGroups
 func (client *Client) GetRouterGroups() ([]RouterGroup, error) {
-	_, err := client.newHTTPRequest(requestOptions{
+	request, err := client.newHTTPRequest(requestOptions{
 		RequestName: internal.GetRouterGroups,
 	})
 
 	if err != nil {
 		return nil, err
 	}
-
 	var fullRouterGroupList []RouterGroup
-	//TODO get router groups
+
+	var response = Response{
+		Result: &fullRouterGroupList,
+	}
+	err = client.connection.Make(request, &response)
 	return fullRouterGroupList, err
 }

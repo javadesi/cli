@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"code.cloudfoundry.org/cli/api/cloudcontroller"
+	"github.com/tedsuo/rata"
 )
 
 // Request represents the request of the router
@@ -15,11 +15,23 @@ type Request struct {
 	body io.ReadSeeker
 }
 
+func (r *Request) ResetBody() error {
+	if r.body == nil {
+		return nil
+	}
+
+	_, err := r.body.Seek(0, 0)
+	return err
+}
+
 // Params represents URI parameters for a request.
 type Params map[string]string
 
 // requestOptions contains all the options to create an HTTP request.
 type requestOptions struct {
+	// Header is the set of request headers
+	Header http.Header
+
 	// Body is the request body
 	Body io.ReadSeeker
 
@@ -41,52 +53,38 @@ type requestOptions struct {
 
 // newHTTPRequest returns a constructed HTTP.Request with some defaults.
 // Defaults are applied when Request fields are not filled in.
-func (client Client) newHTTPRequest(passedRequest requestOptions) (*cloudcontroller.Request, error) {
-	var request *http.Request
-	var err error
-	if passedRequest.URI != "" {
-		var (
-			path *url.URL
-			base *url.URL
-		)
+func (client Client) newHTTPRequest(passedRequest requestOptions) (*Request, error) {
+	request, err := client.router.CreateRequest(
+		passedRequest.RequestName,
+		rata.Params(passedRequest.URIParams),
+		passedRequest.Body,
+	)
 
-		path, err = url.Parse(passedRequest.URI)
-		if err != nil {
-			return nil, err
-		}
-
-		base, err = url.Parse("") // client.API()
-		if err != nil {
-			return nil, err
-		}
-
-		request, err = http.NewRequest(
-			passedRequest.Method,
-			base.ResolveReference(path).String(),
-			passedRequest.Body,
-		)
-	} else {
-		request, err = client.router.CreateRequest(
-			passedRequest.RequestName,
-			map[string]string(passedRequest.URIParams),
-			passedRequest.Body,
-		)
-		if err == nil {
-			request.URL.RawQuery = passedRequest.Query.Encode()
-		}
-	}
 	if err != nil {
 		return nil, err
 	}
 
-	request.Header = http.Header{}
-	request.Header.Set("Accept", "application/json")
-	request.Header.Set("User-Agent", client.userAgent)
-
-	if passedRequest.Body != nil {
-		request.Header.Set("Content-Type", "application/json")
+	if passedRequest.Query != nil {
+		request.URL.RawQuery = passedRequest.Query.Encode()
 	}
 
-	// Make sure the body is the same as the one in the request
-	return cloudcontroller.NewRequest(request, passedRequest.Body), nil
+	if passedRequest.Header != nil {
+		request.Header = passedRequest.Header
+	} else {
+		request.Header = http.Header{}
+	}
+
+	request.Header.Set("Accept", "application/json")
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Connection", "close")
+	request.Header.Set("User-Agent", client.userAgent)
+
+	return &Request{Request: request, body: passedRequest.Body}, nil
+}
+
+func NewRequest(request *http.Request, body io.ReadSeeker) *Request {
+	return &Request{
+		Request: request,
+		body:    body,
+	}
 }

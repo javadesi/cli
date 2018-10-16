@@ -66,12 +66,22 @@ var _ = FDescribe("CreateSharedDomainCommand", func() {
 					BeforeEach(func() {
 						expectedErr = errors.New("Not a real router group")
 						fakeActor.GetRouterGroupByNameReturns(v2action.RouterGroup{}, expectedErr)
+						cmd.RouterGroup = "not-a-router-group"
 					})
 
 					It("should fail and return error", func() {
 						Expect(testUI.Out).To(Say("Creating shared domain %s as %s...", sharedDomainName, username))
 						Expect(executeErr).To(MatchError(expectedErr))
 					})
+				})
+			})
+
+			When("--router-group is not passed", func() {
+				BeforeEach(func() {
+					cmd.RouterGroup = ""
+				})
+				It("does not call fetch the router group", func() {
+					Expect(fakeActor.GetRouterGroupByNameCallCount()).To(Equal(0))
 				})
 			})
 		})

@@ -272,6 +272,15 @@ type FakeConfig struct {
 	requestRetryCountReturnsOnCall map[int]struct {
 		result1 int
 	}
+	RoutingEndpointStub        func() string
+	routingEndpointMutex       sync.RWMutex
+	routingEndpointArgsForCall []struct{}
+	routingEndpointReturns     struct {
+		result1 string
+	}
+	routingEndpointReturnsOnCall map[int]struct {
+		result1 string
+	}
 	SetAccessTokenStub        func(token string)
 	setAccessTokenMutex       sync.RWMutex
 	setAccessTokenArgsForCall []struct {
@@ -1611,6 +1620,46 @@ func (fake *FakeConfig) RequestRetryCountReturnsOnCall(i int, result1 int) {
 	}{result1}
 }
 
+func (fake *FakeConfig) RoutingEndpoint() string {
+	fake.routingEndpointMutex.Lock()
+	ret, specificReturn := fake.routingEndpointReturnsOnCall[len(fake.routingEndpointArgsForCall)]
+	fake.routingEndpointArgsForCall = append(fake.routingEndpointArgsForCall, struct{}{})
+	fake.recordInvocation("RoutingEndpoint", []interface{}{})
+	fake.routingEndpointMutex.Unlock()
+	if fake.RoutingEndpointStub != nil {
+		return fake.RoutingEndpointStub()
+	}
+	if specificReturn {
+		return ret.result1
+	}
+	return fake.routingEndpointReturns.result1
+}
+
+func (fake *FakeConfig) RoutingEndpointCallCount() int {
+	fake.routingEndpointMutex.RLock()
+	defer fake.routingEndpointMutex.RUnlock()
+	return len(fake.routingEndpointArgsForCall)
+}
+
+func (fake *FakeConfig) RoutingEndpointReturns(result1 string) {
+	fake.RoutingEndpointStub = nil
+	fake.routingEndpointReturns = struct {
+		result1 string
+	}{result1}
+}
+
+func (fake *FakeConfig) RoutingEndpointReturnsOnCall(i int, result1 string) {
+	fake.RoutingEndpointStub = nil
+	if fake.routingEndpointReturnsOnCall == nil {
+		fake.routingEndpointReturnsOnCall = make(map[int]struct {
+			result1 string
+		})
+	}
+	fake.routingEndpointReturnsOnCall[i] = struct {
+		result1 string
+	}{result1}
+}
+
 func (fake *FakeConfig) SetAccessToken(token string) {
 	fake.setAccessTokenMutex.Lock()
 	fake.setAccessTokenArgsForCall = append(fake.setAccessTokenArgsForCall, struct {
@@ -2511,6 +2560,8 @@ func (fake *FakeConfig) Invocations() map[string][][]interface{} {
 	defer fake.removePluginMutex.RUnlock()
 	fake.requestRetryCountMutex.RLock()
 	defer fake.requestRetryCountMutex.RUnlock()
+	fake.routingEndpointMutex.RLock()
+	defer fake.routingEndpointMutex.RUnlock()
 	fake.setAccessTokenMutex.RLock()
 	defer fake.setAccessTokenMutex.RUnlock()
 	fake.setOrganizationInformationMutex.RLock()
