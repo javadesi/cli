@@ -20,9 +20,44 @@ var _ = Describe("Domain", func() {
 	})
 
 	Describe("CreateSharedDomain", func() {
-		var domain string
-		When("no errors are encountered", func() {
+		var (
+			domain          string
+			routerGroupGUID string
+		)
 
+		When("no errors are encountered", func() {
+			BeforeEach(func() {
+				response := `{
+											"metadata": {
+												"guid": "43436c2d-2b4f-45c2-9f50-e530e1cedba6",
+												"url": "/v2/shared_domains/43436c2d-2b4f-45c2-9f50-e530e1cedba6",
+												"created_at": "2016-06-08T16:41:37Z",
+												"updated_at": "2016-06-08T16:41:26Z"
+											},
+											"entity": {
+												"name": "example.com",
+												"internal": false,
+												"router_group_guid": "some-guid",
+												"router_group_type": "tcp"
+											}
+										}
+										`
+				domain = "some-domain-name.com"
+				routerGroupGUID = "some-guid"
+				body := fmt.Sprintf(`{"name":"%s","router_group_guid":"%s"}`, domain, routerGroupGUID)
+				server.AppendHandlers(
+					CombineHandlers(
+						VerifyRequest(http.MethodPost, "/v2/shared_domains"),
+						VerifyBody([]byte(body)),
+						RespondWith(http.StatusCreated, response, http.Header{"X-Cf-Warnings": {"warning-1,warning-2"}}),
+					))
+			})
+
+			It("should call the API and return all warnings", func() {
+				warnings, err := client.CreateSharedDomain(domain, routerGroupGUID)
+				Expect(warnings).To(ConsistOf("warning-1", "warning-2"))
+				Expect(err).ToNot(HaveOccurred())
+			})
 		})
 
 		When("the API returns an unauthorized error", func() {

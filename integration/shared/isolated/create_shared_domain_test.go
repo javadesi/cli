@@ -135,7 +135,6 @@ var _ = FDescribe("create-shared-domain command", func() {
 					expectedRouterGroupGUID := routerGroupListResponse[0].GUID
 					Expect(currentRouterGroupGUID).Should(Equal(expectedRouterGroupGUID))
 				})
-
 			})
 
 			When("router-group does not exist", func() {

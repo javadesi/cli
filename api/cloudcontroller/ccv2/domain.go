@@ -59,12 +59,14 @@ func (domain *Domain) UnmarshalJSON(data []byte) error {
 }
 
 type createSharedDomainBody struct {
-	Name string `json:"name"`
+	Name            string `json:"name"`
+	RouterGroupGUID string `json:"router_group_guid,omitempty"`
 }
 
 func (client *Client) CreateSharedDomain(domainName string, routerGroupdGUID string) (Warnings, error) {
 	body := createSharedDomainBody{
-		Name: domainName,
+		Name:            domainName,
+		RouterGroupGUID: routerGroupdGUID,
 	}
 	bodyBytes, err := json.Marshal(body)
 	request, err := client.newHTTPRequest(requestOptions{
