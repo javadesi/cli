@@ -6,5 +6,5 @@ import "code.cloudfoundry.org/cli/api/router"
 
 // RouterClient is a Router API client.
 type RouterClient interface {
-	GetRouterGroups() ([]router.RouterGroup, error)
+	GetRouterGroupsByName(string) ([]router.RouterGroup, error)
 }

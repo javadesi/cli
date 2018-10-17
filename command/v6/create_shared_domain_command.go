@@ -9,6 +9,7 @@ import (
 )
 
 //go:generate counterfeiter . CreateSharedDomainActor
+
 type CreateSharedDomainActor interface {
 	GetRouterGroupByName(string, v2action.RouterClient) (v2action.RouterGroup, error)
 	CreateSharedDomain(string, v2action.RouterGroup) (v2action.Warnings, error)

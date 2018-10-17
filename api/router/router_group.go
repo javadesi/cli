@@ -1,6 +1,8 @@
 package router
 
 import (
+	"net/url"
+
 	"code.cloudfoundry.org/cli/api/router/internal"
 )
 
@@ -13,9 +15,10 @@ type RouterGroup struct {
 }
 
 // GetRouterGroups returns a list of RouterGroups
-func (client *Client) GetRouterGroups() ([]RouterGroup, error) {
+func (client *Client) GetRouterGroupsByName(name string) ([]RouterGroup, error) {
 	request, err := client.newHTTPRequest(requestOptions{
 		RequestName: internal.GetRouterGroups,
+		Query:       url.Values{"name": []string{name}},
 	})
 
 	if err != nil {

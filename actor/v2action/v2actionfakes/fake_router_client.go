@@ -9,14 +9,16 @@ import (
 )
 
 type FakeRouterClient struct {
-	GetRouterGroupsStub        func() ([]router.RouterGroup, error)
-	getRouterGroupsMutex       sync.RWMutex
-	getRouterGroupsArgsForCall []struct{}
-	getRouterGroupsReturns     struct {
+	GetRouterGroupsByNameStub        func(string) ([]router.RouterGroup, error)
+	getRouterGroupsByNameMutex       sync.RWMutex
+	getRouterGroupsByNameArgsForCall []struct {
+		arg1 string
+	}
+	getRouterGroupsByNameReturns struct {
 		result1 []router.RouterGroup
 		result2 error
 	}
-	getRouterGroupsReturnsOnCall map[int]struct {
+	getRouterGroupsByNameReturnsOnCall map[int]struct {
 		result1 []router.RouterGroup
 		result2 error
 	}
@@ -24,44 +26,52 @@ type FakeRouterClient struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeRouterClient) GetRouterGroups() ([]router.RouterGroup, error) {
-	fake.getRouterGroupsMutex.Lock()
-	ret, specificReturn := fake.getRouterGroupsReturnsOnCall[len(fake.getRouterGroupsArgsForCall)]
-	fake.getRouterGroupsArgsForCall = append(fake.getRouterGroupsArgsForCall, struct{}{})
-	fake.recordInvocation("GetRouterGroups", []interface{}{})
-	fake.getRouterGroupsMutex.Unlock()
-	if fake.GetRouterGroupsStub != nil {
-		return fake.GetRouterGroupsStub()
+func (fake *FakeRouterClient) GetRouterGroupsByName(arg1 string) ([]router.RouterGroup, error) {
+	fake.getRouterGroupsByNameMutex.Lock()
+	ret, specificReturn := fake.getRouterGroupsByNameReturnsOnCall[len(fake.getRouterGroupsByNameArgsForCall)]
+	fake.getRouterGroupsByNameArgsForCall = append(fake.getRouterGroupsByNameArgsForCall, struct {
+		arg1 string
+	}{arg1})
+	fake.recordInvocation("GetRouterGroupsByName", []interface{}{arg1})
+	fake.getRouterGroupsByNameMutex.Unlock()
+	if fake.GetRouterGroupsByNameStub != nil {
+		return fake.GetRouterGroupsByNameStub(arg1)
 	}
 	if specificReturn {
 		return ret.result1, ret.result2
 	}
-	return fake.getRouterGroupsReturns.result1, fake.getRouterGroupsReturns.result2
+	return fake.getRouterGroupsByNameReturns.result1, fake.getRouterGroupsByNameReturns.result2
 }
 
-func (fake *FakeRouterClient) GetRouterGroupsCallCount() int {
-	fake.getRouterGroupsMutex.RLock()
-	defer fake.getRouterGroupsMutex.RUnlock()
-	return len(fake.getRouterGroupsArgsForCall)
+func (fake *FakeRouterClient) GetRouterGroupsByNameCallCount() int {
+	fake.getRouterGroupsByNameMutex.RLock()
+	defer fake.getRouterGroupsByNameMutex.RUnlock()
+	return len(fake.getRouterGroupsByNameArgsForCall)
 }
 
-func (fake *FakeRouterClient) GetRouterGroupsReturns(result1 []router.RouterGroup, result2 error) {
-	fake.GetRouterGroupsStub = nil
-	fake.getRouterGroupsReturns = struct {
+func (fake *FakeRouterClient) GetRouterGroupsByNameArgsForCall(i int) string {
+	fake.getRouterGroupsByNameMutex.RLock()
+	defer fake.getRouterGroupsByNameMutex.RUnlock()
+	return fake.getRouterGroupsByNameArgsForCall[i].arg1
+}
+
+func (fake *FakeRouterClient) GetRouterGroupsByNameReturns(result1 []router.RouterGroup, result2 error) {
+	fake.GetRouterGroupsByNameStub = nil
+	fake.getRouterGroupsByNameReturns = struct {
 		result1 []router.RouterGroup
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeRouterClient) GetRouterGroupsReturnsOnCall(i int, result1 []router.RouterGroup, result2 error) {
-	fake.GetRouterGroupsStub = nil
-	if fake.getRouterGroupsReturnsOnCall == nil {
-		fake.getRouterGroupsReturnsOnCall = make(map[int]struct {
+func (fake *FakeRouterClient) GetRouterGroupsByNameReturnsOnCall(i int, result1 []router.RouterGroup, result2 error) {
+	fake.GetRouterGroupsByNameStub = nil
+	if fake.getRouterGroupsByNameReturnsOnCall == nil {
+		fake.getRouterGroupsByNameReturnsOnCall = make(map[int]struct {
 			result1 []router.RouterGroup
 			result2 error
 		})
 	}
-	fake.getRouterGroupsReturnsOnCall[i] = struct {
+	fake.getRouterGroupsByNameReturnsOnCall[i] = struct {
 		result1 []router.RouterGroup
 		result2 error
 	}{result1, result2}
@@ -70,8 +80,8 @@ func (fake *FakeRouterClient) GetRouterGroupsReturnsOnCall(i int, result1 []rout
 func (fake *FakeRouterClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
-	fake.getRouterGroupsMutex.RLock()
-	defer fake.getRouterGroupsMutex.RUnlock()
+	fake.getRouterGroupsByNameMutex.RLock()
+	defer fake.getRouterGroupsByNameMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value
