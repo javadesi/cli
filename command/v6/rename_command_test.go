@@ -1,11 +1,11 @@
-package v2_test
+package v6_test
 
 import (
 	"code.cloudfoundry.org/cli/actor/actionerror"
 	"code.cloudfoundry.org/cli/command/commandfakes"
 	"code.cloudfoundry.org/cli/command/flag"
-	. "code.cloudfoundry.org/cli/command/v2"
-	"code.cloudfoundry.org/cli/command/v2/v2fakes"
+	. "code.cloudfoundry.org/cli/command/v6"
+	"code.cloudfoundry.org/cli/command/v6/v6fakes"
 	"code.cloudfoundry.org/cli/util/ui"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -18,7 +18,7 @@ var _ = Describe("Rename Command", func() {
 		testUI          *ui.UI
 		fakeConfig      *commandfakes.FakeConfig
 		fakeSharedActor *commandfakes.FakeSharedActor
-		fakeActor       *v2fakes.FakeRenameActor
+		fakeActor       *v6fakes.FakeRenameActor
 		binaryName      string
 		executeErr      error
 
@@ -30,7 +30,7 @@ var _ = Describe("Rename Command", func() {
 		testUI = ui.NewTestUI(nil, NewBuffer(), NewBuffer())
 		fakeConfig = new(commandfakes.FakeConfig)
 		fakeSharedActor = new(commandfakes.FakeSharedActor)
-		fakeActor = new(v2fakes.FakeRenameActor)
+		fakeActor = new(v6fakes.FakeRenameActor)
 
 		oldName = "some-old-app-name"
 		newName = "some-new-app-name"
