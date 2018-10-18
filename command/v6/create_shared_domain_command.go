@@ -30,7 +30,12 @@ type CreateSharedDomainCommand struct {
 
 func (cmd *CreateSharedDomainCommand) Setup(config command.Config, ui command.UI) error {
 	ccClient, uaaClient, err := shared.NewClients(config, ui, true)
-	routerClient, _ := shared.NewRouterClient(config, ui, uaaClient) // TODO handle the error
+
+	if err != nil {
+		return err
+	}
+
+	routerClient, err := shared.NewRouterClient(config, ui, uaaClient)
 
 	if err != nil {
 		return err
@@ -59,11 +64,10 @@ func (cmd CreateSharedDomainCommand) Execute(args []string) error {
 	var routerGroup v2action.RouterGroup
 
 	if cmd.RouterGroup != "" {
-		rg, routerGroupErr := cmd.Actor.GetRouterGroupByName(cmd.RouterGroup, cmd.RouterClient)
-		if routerGroupErr != nil {
-			return routerGroupErr
+		routerGroup, err = cmd.Actor.GetRouterGroupByName(cmd.RouterGroup, cmd.RouterClient)
+		if err != nil {
+			return err
 		}
-		routerGroup = rg
 	}
 
 	warnings, err := cmd.Actor.CreateSharedDomain(cmd.RequiredArgs.Domain, routerGroup)
@@ -72,6 +76,7 @@ func (cmd CreateSharedDomainCommand) Execute(args []string) error {
 	if err != nil {
 		return err
 	}
+
 	cmd.UI.DisplayOK()
 	return nil
 }

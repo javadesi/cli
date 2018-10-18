@@ -120,11 +120,6 @@ var _ = Describe("New Clients", func() {
 			Expect(fakeConfig.BinaryNameCallCount()).To(Equal(1))
 			Expect(fakeConfig.BinaryVersionCallCount()).To(Equal(1))
 		})
-
-		XIt("should add a wrapper for the uaa client", func() {
-			// routerClient, err := NewRouterClient(fakeConfig, testUI, fakeUaaClient)
-			Expect(true).To(BeFalse())
-		})
 	})
 
 })

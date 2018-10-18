@@ -474,4 +474,72 @@ var _ = Describe("Verbose", func() {
 			Entry("CF_TRACE filepath, config trace filepath, '-v': enables verbose AND logging to file for BOTH paths", "/foo", "/bar", []string{"/foo", "/bar"}),
 		)
 	})
+
+	FDescribe("routing", func() {
+		DescribeTable("router client",
+			func(env string, configTrace string, flag bool) {
+
+				tmpDir, err := ioutil.TempDir("", "")
+				defer os.RemoveAll(tmpDir)
+				Expect(err).NotTo(HaveOccurred())
+
+				helpers.LoginCF()
+				helpers.TargetOrgAndSpace(ReadOnlyOrg, ReadOnlySpace)
+
+				var envMap map[string]string
+				if env != "" {
+					if env[0] == '/' {
+						env = filepath.Join(tmpDir, env)
+					}
+					envMap = map[string]string{"CF_TRACE": env}
+				}
+				domainName := helpers.NewDomainName()
+				command := []string{"create-shared-domain", domainName, "--router-group", "default-tcp"}
+
+				if flag {
+					command = append(command, "-v")
+				}
+
+				if configTrace != "" {
+					if string(configTrace[0]) == "/" {
+						configTrace = filepath.Join(tmpDir, configTrace)
+					}
+					session := helpers.CF("config", "--trace", configTrace)
+					Eventually(session).Should(Exit(0))
+				}
+
+				session := helpers.CFWithEnv(envMap, command...)
+
+				// Eventually(session).Should(Say("REQUEST:"))
+				Eventually(session).Should(Say("GET /routing/v1/router_groups"))
+				// Eventually(session).Should(Say("GET /routing/v1/router_groups?name=some-router-group"))
+				// Eventually(session).Should(Say("RESPONSE:"))
+				// Eventually(session).Should(Say(`"token_endpoint": "http.*"`))
+				// Eventually(session).Should(Say("REQUEST:"))
+				// Eventually(session).Should(Say("POST /Users"))
+				// Eventually(session).Should(Say("User-Agent: cf/[\\w.+-]+ \\(go\\d+\\.\\d+(\\.\\d+)?; %s %s\\)", runtime.GOARCH, runtime.GOOS))
+				// Eventually(session).Should(Say("RESPONSE:"))
+				// Eventually(session).Should(Say("REQUEST:"))
+				// Eventually(session).Should(Say("POST /v2/users"))
+				// Eventually(session).Should(Say("User-Agent: cf/[\\w.+-]+ \\(go\\d+\\.\\d+(\\.\\d+)?; %s %s\\)", runtime.GOARCH, runtime.GOOS))
+				// Eventually(session).Should(Say("RESPONSE:"))
+				// Eventually(session).Should(Exit(0))
+			},
+
+			// Entry("CF_TRACE true: enables verbose", "true", "", false),
+			// Entry("CF_TRACE true, config trace false: enables verbose", "true", "false", false),
+			// Entry("CF_TRACE true, config trace file path: enables verbose AND logging to file", "true", "/foo", false),
+
+			// Entry("CF_TRACE false, '-v': enables verbose", "false", "", true),
+			// Entry("CF_TRACE false, config trace file path, '-v': enables verbose AND logging to file", "false", "/foo", true),
+
+			Entry("CF_TRACE empty:, '-v': enables verbose", "", "", true),
+			// Entry("CF_TRACE empty, config trace true: enables verbose", "", "true", false),
+			// Entry("CF_TRACE empty, config trace file path, '-v': enables verbose AND logging to file", "", "/foo", true),
+
+			// Entry("CF_TRACE filepath, '-v': enables logging to file", "/foo", "", true),
+			// Entry("CF_TRACE filepath, config trace true: enables verbose AND logging to file", "/foo", "true", false),
+			// Entry("CF_TRACE filepath, config trace filepath, '-v': enables verbose AND logging to file for BOTH paths", "/foo", "/bar", true),
+		)
+	})
 })

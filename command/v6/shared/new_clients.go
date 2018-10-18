@@ -97,7 +97,18 @@ func NewRouterClient(config command.Config, ui command.UI, uaaClient *uaa.Client
 
 	routerWrappers := []router.ConnectionWrapper{}
 
+	verbose, location := config.Verbose()
+
+	if verbose {
+		routerWrappers = append(routerWrappers, router.ConnectionWrapper(ccWrapper.NewRequestLogger(ui.RequestLoggerTerminalDisplay())))
+	}
+
+	if location != nil {
+		// routerWrappers = append(routerWrappers, ccWrapper.NewRequestLogger(ui.RequestLoggerFileWriter(location)))
+	}
+
 	authWrapper := routerWrapper.NewUAAAuthentication(nil, config)
+	// TODO: add verbose wrapper, location wrapper, and retry wrapper
 
 	routerWrappers = append(routerWrappers, authWrapper)
 
