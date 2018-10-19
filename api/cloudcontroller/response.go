@@ -31,11 +31,3 @@ func (r *Response) Reset() {
 func (r *Response) PopulateFrom(httpResponse *http.Response) error {
 	return nil
 }
-
-func (r *Response) GetHTTPResponse() *http.Response {
-	panic("Not yet implemented")
-}
-
-func (r *Response) StatusCode() int {
-	return 7234
-}

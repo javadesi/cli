@@ -24,7 +24,7 @@ func (e *errorWrapper) Make(request *shared.Request, passedResponse shared.Respo
 	err := e.connection.Make(request, passedResponse)
 
 	if rawHTTPStatusErr, ok := err.(ccerror.RawHTTPStatusError); ok {
-		if passedResponse.StatusCode() >= http.StatusInternalServerError {
+		if passedResponse.StatusCode >= http.StatusInternalServerError {
 			return convert500(rawHTTPStatusErr)
 		}
 

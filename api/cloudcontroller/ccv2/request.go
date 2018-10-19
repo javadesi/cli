@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"code.cloudfoundry.org/cli/api/cloudcontroller"
+	"code.cloudfoundry.org/cli/api/shared"
 )
 
 // Params represents URI parameters for a request.
@@ -81,5 +81,5 @@ func (client Client) newHTTPRequest(passedRequest requestOptions) (*shared.Reque
 	}
 
 	// Make sure the body is the same as the one in the request
-	return cloudcontroller.NewRequest(request, passedRequest.Body), nil
+	return shared.NewRequest(request, passedRequest.Body), nil
 }

@@ -3,7 +3,6 @@ package wrapper
 import (
 	"net/http"
 
-	"code.cloudfoundry.org/cli/api/cloudcontroller"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
 	"code.cloudfoundry.org/cli/api/shared"
 )
@@ -23,7 +22,7 @@ func NewRetryRequest(maxRetries int) *RetryRequest {
 }
 
 // Make retries the request if it comes back with a 5XX status code.
-func (retry *RetryRequest) Make(request *shared.Request, passedResponse *cloudcontroller.Response) error {
+func (retry *RetryRequest) Make(request *shared.Request, passedResponse shared.Response) error {
 	var err error
 
 	for i := 0; i < retry.maxRetries+1; i++ {

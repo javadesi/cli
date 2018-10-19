@@ -1,7 +1,6 @@
 package wrapper
 
 import (
-	"code.cloudfoundry.org/cli/api/cloudcontroller"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
 	"code.cloudfoundry.org/cli/api/shared"
 	"code.cloudfoundry.org/cli/api/uaa"
@@ -44,7 +43,7 @@ func NewUAAAuthentication(client UAAClient, cache TokenCache) *UAAAuthentication
 // Make adds authentication headers to the passed in request and then calls the
 // wrapped connection's Make. If the client is not set on the wrapper, it will
 // not add any header or handle any authentication errors.
-func (t *UAAAuthentication) Make(request *shared.Request, passedResponse *cloudcontroller.Response) error {
+func (t *UAAAuthentication) Make(request *shared.Request, passedResponse shared.Response) error {
 	if t.client == nil {
 		return t.connection.Make(request, passedResponse)
 	}

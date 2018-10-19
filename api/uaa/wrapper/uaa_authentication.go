@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"code.cloudfoundry.org/cli/api/shared"
 	"code.cloudfoundry.org/cli/api/uaa"
 )
 
@@ -29,7 +30,7 @@ type TokenCache interface {
 // UAAAuthentication wraps connections and adds authentication headers to all
 // requests
 type UAAAuthentication struct {
-	connection uaa.Connection
+	connection shared.Connection
 	client     UAAClient
 	cache      TokenCache
 }
@@ -45,7 +46,7 @@ func NewUAAAuthentication(client UAAClient, cache TokenCache) *UAAAuthentication
 
 // Make adds authentication headers to the passed in request and then calls the
 // wrapped connection's Make
-func (t *UAAAuthentication) Make(request *http.Request, passedResponse *uaa.Response) error {
+func (t *UAAAuthentication) Make(request *shared.Request, passedResponse shared.Response) error {
 	if t.client == nil {
 		return t.connection.Make(request, passedResponse)
 	}
@@ -95,14 +96,14 @@ func (t *UAAAuthentication) SetClient(client UAAClient) {
 }
 
 // Wrap sets the connection on the UAAAuthentication and returns itself
-func (t *UAAAuthentication) Wrap(innerconnection uaa.Connection) uaa.Connection {
+func (t *UAAAuthentication) Wrap(innerconnection shared.Connection) shared.Connection {
 	t.connection = innerconnection
 	return t
 }
 
 // The authentication header is not added to token refresh requests or login
 // requests.
-func skipAuthenticationHeader(request *http.Request, body []byte) bool {
+func skipAuthenticationHeader(request *shared.Request, body []byte) bool {
 	stringBody := string(body)
 
 	return strings.Contains(request.URL.String(), "/oauth/token") &&

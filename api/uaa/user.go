@@ -65,7 +65,7 @@ func (client *Client) CreateUser(user string, password string, origin string) (U
 		Header: http.Header{
 			"Content-Type": {"application/json"},
 		},
-		Body: bytes.NewBuffer(bodyBytes),
+		Body: bytes.NewReader(bodyBytes),
 	})
 	if err != nil {
 		return User{}, err
