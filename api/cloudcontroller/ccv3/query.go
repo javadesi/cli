@@ -40,7 +40,7 @@ type Query struct {
 }
 
 // FormatQueryParameters converts a Query object into a collection that
-// cloudcontroller.Request can accept.
+// shared.Request can accept.
 func FormatQueryParameters(queries []Query) url.Values {
 	params := url.Values{}
 	for _, query := range queries {

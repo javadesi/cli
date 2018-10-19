@@ -5,13 +5,14 @@ import (
 
 	"code.cloudfoundry.org/cli/api/cloudcontroller"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
+	"code.cloudfoundry.org/cli/api/shared"
 )
 
 // RetryRequest is a wrapper that retries failed requests if they contain a 5XX
 // status code.
 type RetryRequest struct {
 	maxRetries int
-	connection cloudcontroller.Connection
+	connection shared.Connection
 }
 
 // NewRetryRequest returns a pointer to a RetryRequest wrapper.
@@ -22,7 +23,7 @@ func NewRetryRequest(maxRetries int) *RetryRequest {
 }
 
 // Make retries the request if it comes back with a 5XX status code.
-func (retry *RetryRequest) Make(request *cloudcontroller.Request, passedResponse *cloudcontroller.Response) error {
+func (retry *RetryRequest) Make(request *shared.Request, passedResponse *cloudcontroller.Response) error {
 	var err error
 
 	for i := 0; i < retry.maxRetries+1; i++ {
@@ -48,7 +49,7 @@ func (retry *RetryRequest) Make(request *cloudcontroller.Request, passedResponse
 }
 
 // Wrap sets the connection in the RetryRequest and returns itself.
-func (retry *RetryRequest) Wrap(innerconnection cloudcontroller.Connection) cloudcontroller.Connection {
+func (retry *RetryRequest) Wrap(innerconnection shared.Connection) shared.Connection {
 	retry.connection = innerconnection
 	return retry
 }

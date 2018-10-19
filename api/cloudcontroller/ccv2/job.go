@@ -346,7 +346,7 @@ func (*Client) createMultipartBodyAndHeaderForDroplet(droplet io.Reader) (string
 	return form.FormDataContentType(), writerOutput, writeErrors
 }
 
-func (client *Client) uploadAsynchronously(request *cloudcontroller.Request, writeErrors <-chan error) (Job, Warnings, error) {
+func (client *Client) uploadAsynchronously(request *shared.Request, writeErrors <-chan error) (Job, Warnings, error) {
 	var job Job
 	response := cloudcontroller.Response{
 		Result: &job,

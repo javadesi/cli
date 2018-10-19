@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"code.cloudfoundry.org/cli/api/cloudcontroller"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
+	"code.cloudfoundry.org/cli/api/shared"
 )
 
 // errorWrapper is the wrapper that converts responses with 4xx and 5xx status
 // codes to an error.
 type errorWrapper struct {
-	connection cloudcontroller.Connection
+	connection shared.Connection
 }
 
 func newErrorWrapper() *errorWrapper {
@@ -20,11 +20,11 @@ func newErrorWrapper() *errorWrapper {
 
 // Make converts RawHTTPStatusError, which represents responses with 4xx and
 // 5xx status codes, to specific errors.
-func (e *errorWrapper) Make(request *cloudcontroller.Request, passedResponse *cloudcontroller.Response) error {
+func (e *errorWrapper) Make(request *shared.Request, passedResponse shared.Response) error {
 	err := e.connection.Make(request, passedResponse)
 
 	if rawHTTPStatusErr, ok := err.(ccerror.RawHTTPStatusError); ok {
-		if passedResponse.HTTPResponse.StatusCode >= http.StatusInternalServerError {
+		if passedResponse.StatusCode() >= http.StatusInternalServerError {
 			return convert500(rawHTTPStatusErr)
 		}
 
@@ -34,7 +34,7 @@ func (e *errorWrapper) Make(request *cloudcontroller.Request, passedResponse *cl
 }
 
 // Wrap wraps a Cloud Controller connection in this error handling wrapper.
-func (e *errorWrapper) Wrap(innerconnection cloudcontroller.Connection) cloudcontroller.Connection {
+func (e *errorWrapper) Wrap(innerconnection shared.Connection) shared.Connection {
 	e.connection = innerconnection
 	return e
 }

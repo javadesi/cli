@@ -1,19 +1,21 @@
 package wrapper
 
-import "code.cloudfoundry.org/cli/api/cloudcontroller"
+import (
+	"code.cloudfoundry.org/cli/api/shared"
+)
 
 // CustomWrapper is a wrapper that can execute arbitrary code via the
 // CustomMake function on every request that passes through Make.
 type CustomWrapper struct {
-	connection cloudcontroller.Connection
-	CustomMake func(connection cloudcontroller.Connection, request *cloudcontroller.Request, passedResponse *cloudcontroller.Response) error
+	connection shared.Connection
+	CustomMake func(connection shared.Connection, request *shared.Request, passedResponse shared.Response) error
 }
 
-func (e *CustomWrapper) Make(request *cloudcontroller.Request, passedResponse *cloudcontroller.Response) error {
+func (e *CustomWrapper) Make(request *shared.Request, passedResponse shared.Response) error {
 	return e.CustomMake(e.connection, request, passedResponse)
 }
 
-func (e *CustomWrapper) Wrap(innerconnection cloudcontroller.Connection) cloudcontroller.Connection {
+func (e *CustomWrapper) Wrap(innerconnection shared.Connection) shared.Connection {
 	e.connection = innerconnection
 	return e
 }

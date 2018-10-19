@@ -77,8 +77,8 @@ import (
 	"runtime"
 	"time"
 
-	"code.cloudfoundry.org/cli/api/cloudcontroller"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/internal"
+	"code.cloudfoundry.org/cli/api/shared"
 )
 
 // Warnings are a collection of warnings that the Cloud Controller can return
@@ -90,7 +90,7 @@ type Client struct {
 	Info
 	cloudControllerURL string
 
-	connection cloudcontroller.Connection
+	connection shared.Connection
 	router     *internal.Router
 	userAgent  string
 	wrappers   []ConnectionWrapper

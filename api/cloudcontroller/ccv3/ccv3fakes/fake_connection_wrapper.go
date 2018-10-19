@@ -21,16 +21,16 @@ type FakeConnectionWrapper struct {
 	makeReturnsOnCall map[int]struct {
 		result1 error
 	}
-	WrapStub        func(cloudcontroller.Connection) cloudcontroller.Connection
+	WrapStub        func(shared.Connection) shared.Connection
 	wrapMutex       sync.RWMutex
 	wrapArgsForCall []struct {
-		arg1 cloudcontroller.Connection
+		arg1 shared.Connection
 	}
 	wrapReturns struct {
-		result1 cloudcontroller.Connection
+		result1 shared.Connection
 	}
 	wrapReturnsOnCall map[int]struct {
-		result1 cloudcontroller.Connection
+		result1 shared.Connection
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
@@ -97,11 +97,11 @@ func (fake *FakeConnectionWrapper) MakeReturnsOnCall(i int, result1 error) {
 	}{result1}
 }
 
-func (fake *FakeConnectionWrapper) Wrap(arg1 cloudcontroller.Connection) cloudcontroller.Connection {
+func (fake *FakeConnectionWrapper) Wrap(arg1 shared.Connection) shared.Connection {
 	fake.wrapMutex.Lock()
 	ret, specificReturn := fake.wrapReturnsOnCall[len(fake.wrapArgsForCall)]
 	fake.wrapArgsForCall = append(fake.wrapArgsForCall, struct {
-		arg1 cloudcontroller.Connection
+		arg1 shared.Connection
 	}{arg1})
 	fake.recordInvocation("Wrap", []interface{}{arg1})
 	fake.wrapMutex.Unlock()
@@ -121,39 +121,39 @@ func (fake *FakeConnectionWrapper) WrapCallCount() int {
 	return len(fake.wrapArgsForCall)
 }
 
-func (fake *FakeConnectionWrapper) WrapCalls(stub func(cloudcontroller.Connection) cloudcontroller.Connection) {
+func (fake *FakeConnectionWrapper) WrapCalls(stub func(shared.Connection) shared.Connection) {
 	fake.wrapMutex.Lock()
 	defer fake.wrapMutex.Unlock()
 	fake.WrapStub = stub
 }
 
-func (fake *FakeConnectionWrapper) WrapArgsForCall(i int) cloudcontroller.Connection {
+func (fake *FakeConnectionWrapper) WrapArgsForCall(i int) shared.Connection {
 	fake.wrapMutex.RLock()
 	defer fake.wrapMutex.RUnlock()
 	argsForCall := fake.wrapArgsForCall[i]
 	return argsForCall.arg1
 }
 
-func (fake *FakeConnectionWrapper) WrapReturns(result1 cloudcontroller.Connection) {
+func (fake *FakeConnectionWrapper) WrapReturns(result1 shared.Connection) {
 	fake.wrapMutex.Lock()
 	defer fake.wrapMutex.Unlock()
 	fake.WrapStub = nil
 	fake.wrapReturns = struct {
-		result1 cloudcontroller.Connection
+		result1 shared.Connection
 	}{result1}
 }
 
-func (fake *FakeConnectionWrapper) WrapReturnsOnCall(i int, result1 cloudcontroller.Connection) {
+func (fake *FakeConnectionWrapper) WrapReturnsOnCall(i int, result1 shared.Connection) {
 	fake.wrapMutex.Lock()
 	defer fake.wrapMutex.Unlock()
 	fake.WrapStub = nil
 	if fake.wrapReturnsOnCall == nil {
 		fake.wrapReturnsOnCall = make(map[int]struct {
-			result1 cloudcontroller.Connection
+			result1 shared.Connection
 		})
 	}
 	fake.wrapReturnsOnCall[i] = struct {
-		result1 cloudcontroller.Connection
+		result1 shared.Connection
 	}{result1}
 }
 

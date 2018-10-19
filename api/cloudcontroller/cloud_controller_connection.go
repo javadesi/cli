@@ -1,3 +1,13 @@
+// Package cloudcontroller contains shared utilies between the V2 and V3
+// clients.
+//
+// These sets of packages are still under development/pre-pre-pre...alpha. Use
+// at your own risk! Functionality and design may change without warning.
+//
+// Where are the clients?
+//
+// These clients live in ccv2 and ccv3 packages. Each of them only works with
+// the V2 and V3 api respectively.
 package cloudcontroller
 
 import (
@@ -11,6 +21,7 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
+	"code.cloudfoundry.org/cli/api/shared"
 )
 
 // Config is for configuring a CloudControllerConnection.
@@ -46,11 +57,11 @@ func NewConnection(config Config) *CloudControllerConnection {
 }
 
 // Make performs the request and parses the response.
-func (connection *CloudControllerConnection) Make(request *Request, passedResponse *Response) error {
+func (connection *CloudControllerConnection) Make(request *shared.Request, passedResponse shared.Response) error {
 	// In case this function is called from a retry, passedResponse may already
 	// be populated with a previous response. We reset in case there's an HTTP
 	// error and we don't repopulate it in populateResponse.
-	passedResponse.reset()
+	passedResponse.Reset()
 
 	response, err := connection.HTTPClient.Do(request.Request)
 	if err != nil {
@@ -105,35 +116,36 @@ func (*CloudControllerConnection) handleWarnings(response *http.Response) ([]str
 	return warnings, nil
 }
 
-func (connection *CloudControllerConnection) populateResponse(response *http.Response, passedResponse *Response) error {
-	passedResponse.HTTPResponse = response
+func (connection *CloudControllerConnection) populateResponse(response *http.Response, passedResponse shared.Response) error {
+	return passedResponse.PopulateFrom(response)
+	// passedResponse.HTTPResponse = response
 
-	warnings, err := connection.handleWarnings(response)
-	if err != nil {
-		return err
-	}
-	passedResponse.Warnings = warnings
+	// warnings, err := connection.handleWarnings(response)
+	// if err != nil {
+	// 	return err
+	// }
+	// passedResponse.Warnings = warnings
 
-	if resourceLocationURL := response.Header.Get("Location"); resourceLocationURL != "" {
-		passedResponse.ResourceLocationURL = resourceLocationURL
-	}
+	// if resourceLocationURL := response.Header.Get("Location"); resourceLocationURL != "" {
+	// 	passedResponse.ResourceLocationURL = resourceLocationURL
+	// }
 
-	err = connection.handleStatusCodes(response, passedResponse)
-	if err != nil {
-		return err
-	}
+	// err = connection.handleStatusCodes(response, passedResponse)
+	// if err != nil {
+	// 	return err
+	// }
 
-	// TODO: only unmarshal on 'application/json', skip otherwise - Fixing this
-	// todo will require changing ALL the API tests to include the content-type
-	// in their tests.
-	if passedResponse.Result != nil {
-		err = DecodeJSON(passedResponse.RawResponse, passedResponse.Result)
-		if err != nil {
-			return err
-		}
-	}
+	// // TODO: only unmarshal on 'application/json', skip otherwise - Fixing this
+	// // todo will require changing ALL the API tests to include the content-type
+	// // in their tests.
+	// if passedResponse.Result != nil {
+	// 	err = DecodeJSON(passedResponse.RawResponse, passedResponse.Result)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
 
-	return nil
+	// return nil
 }
 
 func (*CloudControllerConnection) processRequestErrors(request *http.Request, err error) error {

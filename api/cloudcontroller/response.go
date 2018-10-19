@@ -22,8 +22,20 @@ type Response struct {
 	ResourceLocationURL string
 }
 
-func (r *Response) reset() {
+func (r *Response) Reset() {
 	r.RawResponse = []byte{}
 	r.Warnings = []string{}
 	r.HTTPResponse = nil
+}
+
+func (r *Response) PopulateFrom(httpResponse *http.Response) error {
+	return nil
+}
+
+func (r *Response) GetHTTPResponse() *http.Response {
+	panic("Not yet implemented")
+}
+
+func (r *Response) StatusCode() int {
+	return 7234
 }

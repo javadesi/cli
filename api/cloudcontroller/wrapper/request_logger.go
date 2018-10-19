@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"code.cloudfoundry.org/cli/api/cloudcontroller"
+	"code.cloudfoundry.org/cli/api/shared"
 )
 
 //go:generate counterfeiter . RequestLoggerOutput
@@ -30,7 +30,7 @@ type RequestLoggerOutput interface {
 // RequestLogger is the wrapper that logs requests to and responses from the
 // Cloud Controller server
 type RequestLogger struct {
-	connection cloudcontroller.Connection
+	connection shared.Connection
 	output     RequestLoggerOutput
 }
 
@@ -42,7 +42,7 @@ func NewRequestLogger(output RequestLoggerOutput) *RequestLogger {
 }
 
 // Make records the request and the response to UI
-func (logger *RequestLogger) Make(request *cloudcontroller.Request, passedResponse *cloudcontroller.Response) error {
+func (logger *RequestLogger) Make(request *shared.Request, passedResponse shared.Response) error {
 	err := logger.displayRequest(request)
 	if err != nil {
 		logger.output.HandleInternalError(err)
@@ -61,12 +61,12 @@ func (logger *RequestLogger) Make(request *cloudcontroller.Request, passedRespon
 }
 
 // Wrap sets the connection on the RequestLogger and returns itself
-func (logger *RequestLogger) Wrap(innerconnection cloudcontroller.Connection) cloudcontroller.Connection {
+func (logger *RequestLogger) Wrap(innerconnection shared.Connection) shared.Connection {
 	logger.connection = innerconnection
 	return logger
 }
 
-func (logger *RequestLogger) displayRequest(request *cloudcontroller.Request) error {
+func (logger *RequestLogger) displayRequest(request *shared.Request) error {
 	err := logger.output.Start()
 	if err != nil {
 		return err
@@ -118,7 +118,7 @@ func (logger *RequestLogger) displayRequest(request *cloudcontroller.Request) er
 	return nil
 }
 
-func (logger *RequestLogger) displayResponse(passedResponse *cloudcontroller.Response) error {
+func (logger *RequestLogger) displayResponse(passedResponse shared.Response) error {
 	err := logger.output.Start()
 	if err != nil {
 		return err

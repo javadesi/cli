@@ -109,4 +109,4 @@ func (fake *FakeConnection) recordInvocation(key string, args []interface{}) {
 	fake.invocations[key] = append(fake.invocations[key], args)
 }
 
-var _ cloudcontroller.Connection = new(FakeConnection)
+var _ shared.Connection = new(FakeConnection)

@@ -34,7 +34,7 @@ type requestOptions struct {
 
 // newHTTPRequest returns a constructed HTTP.Request with some defaults.
 // Defaults are applied when Request fields are not filled in.
-func (client Client) newHTTPRequest(passedRequest requestOptions) (*cloudcontroller.Request, error) {
+func (client Client) newHTTPRequest(passedRequest requestOptions) (*shared.Request, error) {
 	var request *http.Request
 	var err error
 	if passedRequest.URI != "" {

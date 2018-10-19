@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"code.cloudfoundry.org/cli/api/shared"
 	"code.cloudfoundry.org/cli/api/uaa/internal"
 )
 
@@ -27,13 +28,13 @@ type requestOptions struct {
 	// URL is the request path.
 	URL string
 	// Body is the request body
-	Body io.Reader
+	Body io.ReadSeeker
 }
 
-// newRequest returns a constructed http.Request with some defaults. The
+// newRequest returns a constructed Request with some defaults. The
 // request will terminate the connection after it is sent (via a 'Connection:
 // close' header).
-func (client *Client) newRequest(passedRequest requestOptions) (*http.Request, error) {
+func (client *Client) newRequest(passedRequest requestOptions) (*shared.Request, error) {
 	var request *http.Request
 	var err error
 
@@ -67,5 +68,5 @@ func (client *Client) newRequest(passedRequest requestOptions) (*http.Request, e
 	request.Header.Set("Connection", "close")
 	request.Header.Set("User-Agent", client.userAgent)
 
-	return request, nil
+	return shared.NewRequest(request, passedRequest.Body), nil
 }

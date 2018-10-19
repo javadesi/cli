@@ -4,8 +4,8 @@ import (
 	"io"
 	"net/http"
 
-	"code.cloudfoundry.org/cli/api/cloudcontroller"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/internal"
+	"code.cloudfoundry.org/cli/api/shared"
 )
 
 // requestOptions contains all the options to create an HTTP request.
@@ -31,7 +31,7 @@ type requestOptions struct {
 
 // newHTTPRequest returns a constructed HTTP.Request with some defaults.
 // Defaults are applied when Request options are not filled in.
-func (client *Client) newHTTPRequest(passedRequest requestOptions) (*cloudcontroller.Request, error) {
+func (client *Client) newHTTPRequest(passedRequest requestOptions) (*shared.Request, error) {
 	var request *http.Request
 	var err error
 
@@ -64,5 +64,5 @@ func (client *Client) newHTTPRequest(passedRequest requestOptions) (*cloudcontro
 		request.Header.Set("Content-Type", "application/json")
 	}
 
-	return cloudcontroller.NewRequest(request, passedRequest.Body), nil
+	return shared.NewRequest(request, passedRequest.Body), nil
 }

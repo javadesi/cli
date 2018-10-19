@@ -3,12 +3,14 @@ package uaa
 import (
 	"encoding/json"
 	"net/http"
+
+	"code.cloudfoundry.org/cli/api/shared"
 )
 
 // errorWrapper is the wrapper that converts responses with 4xx and 5xx status
 // codes to an error.
 type errorWrapper struct {
-	connection Connection
+	connection shared.Connection
 }
 
 // NewErrorWrapper returns a new error wrapper.
@@ -18,7 +20,7 @@ func NewErrorWrapper() *errorWrapper {
 
 // Make converts RawHTTPStatusError, which represents responses with 4xx and
 // 5xx status codes, to specific errors.
-func (e *errorWrapper) Make(request *http.Request, passedResponse *Response) error {
+func (e *errorWrapper) Make(request *shared.Request, passedResponse shared.Response) error {
 	err := e.connection.Make(request, passedResponse)
 
 	if rawHTTPStatusErr, ok := err.(RawHTTPStatusError); ok {
@@ -29,7 +31,7 @@ func (e *errorWrapper) Make(request *http.Request, passedResponse *Response) err
 }
 
 // Wrap wraps a UAA connection in this error handling wrapper.
-func (e *errorWrapper) Wrap(innerconnection Connection) Connection {
+func (e *errorWrapper) Wrap(innerconnection shared.Connection) shared.Connection {
 	e.connection = innerconnection
 	return e
 }

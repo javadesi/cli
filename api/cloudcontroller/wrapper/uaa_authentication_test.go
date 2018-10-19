@@ -24,8 +24,8 @@ var _ = Describe("UAA Authentication", func() {
 		fakeClient     *wrapperfakes.FakeUAAClient
 		inMemoryCache  *util.InMemoryCache
 
-		wrapper cloudcontroller.Connection
-		request *cloudcontroller.Request
+		wrapper shared.Connection
+		request *shared.Request
 		inner   *UAAAuthentication
 	)
 
@@ -38,7 +38,7 @@ var _ = Describe("UAA Authentication", func() {
 		inner = NewUAAAuthentication(fakeClient, inMemoryCache)
 		wrapper = inner.Wrap(fakeConnection)
 
-		request = &cloudcontroller.Request{
+		request = &shared.Request{
 			Request: &http.Request{
 				Header: http.Header{},
 			},
@@ -109,7 +109,7 @@ var _ = Describe("UAA Authentication", func() {
 		When("the token is invalid", func() {
 			var (
 				expectedBody string
-				request      *cloudcontroller.Request
+				request      *shared.Request
 				executeErr   error
 			)
 
@@ -122,7 +122,7 @@ var _ = Describe("UAA Authentication", func() {
 				}, body)
 
 				makeCount := 0
-				fakeConnection.MakeStub = func(request *cloudcontroller.Request, response *cloudcontroller.Response) error {
+				fakeConnection.MakeStub = func(request *shared.Request, response *cloudcontroller.Response) error {
 					body, err := ioutil.ReadAll(request.Body)
 					Expect(err).NotTo(HaveOccurred())
 					Expect(string(body)).To(Equal(expectedBody))

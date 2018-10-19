@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"runtime"
 
+	"code.cloudfoundry.org/cli/api/shared"
 	"code.cloudfoundry.org/cli/api/uaa/internal"
 )
 
@@ -18,7 +19,7 @@ type Client struct {
 
 	config Config
 
-	connection Connection
+	connection shared.Connection
 	router     *internal.Router
 	userAgent  string
 }

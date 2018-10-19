@@ -90,7 +90,7 @@ import (
 	"runtime"
 	"time"
 
-	"code.cloudfoundry.org/cli/api/cloudcontroller"
+	"code.cloudfoundry.org/cli/api/shared"
 	"github.com/tedsuo/rata"
 )
 
@@ -112,7 +112,7 @@ type Client struct {
 	jobPollingInterval time.Duration
 	jobPollingTimeout  time.Duration
 
-	connection cloudcontroller.Connection
+	connection shared.Connection
 	router     *rata.RequestGenerator
 	userAgent  string
 	wrappers   []ConnectionWrapper

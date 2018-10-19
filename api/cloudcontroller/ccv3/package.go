@@ -12,6 +12,7 @@ import (
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/constant"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/internal"
+	"code.cloudfoundry.org/cli/api/shared"
 )
 
 //go:generate counterfeiter io.Reader
@@ -334,7 +335,7 @@ func (*Client) createUploadStream(path string, paramName string) (io.ReadSeeker,
 	return bytes.NewReader(body.Bytes()), writer.FormDataContentType(), err
 }
 
-func (client *Client) uploadAsynchronously(request *cloudcontroller.Request, writeErrors <-chan error) (Package, Warnings, error) {
+func (client *Client) uploadAsynchronously(request *shared.Request, writeErrors <-chan error) (Package, Warnings, error) {
 	var pkg Package
 	response := cloudcontroller.Response{
 		Result: &pkg,

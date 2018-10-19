@@ -1,15 +1,14 @@
 package uaa
 
 import (
-	"bytes"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/json"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
 	"time"
+
+	"code.cloudfoundry.org/cli/api/shared"
 )
 
 // UAAConnection represents the connection to UAA
@@ -46,13 +45,13 @@ func NewConnection(skipSSLValidation bool, disableKeepAlives bool, dialTimeout t
 
 // Make takes a passedRequest, converts it into an HTTP request and then
 // executes it. The response is then injected into passedResponse.
-func (connection *UAAConnection) Make(request *http.Request, passedResponse *Response) error {
+func (connection *UAAConnection) Make(request *shared.Request, passedResponse shared.Response) error {
 	// In case this function is called from a retry, passedResponse may already
 	// be populated with a previous response. We reset in case there's an HTTP
 	// error and we don't repopulate it in populateResponse.
-	passedResponse.reset()
+	passedResponse.Reset()
 
-	response, err := connection.HTTPClient.Do(request)
+	response, err := connection.HTTPClient.Do(request.Request)
 	if err != nil {
 		return connection.processRequestErrors(request, err)
 	}
@@ -71,34 +70,35 @@ func (*UAAConnection) handleStatusCodes(response *http.Response, passedResponse 
 	return nil
 }
 
-func (connection *UAAConnection) populateResponse(response *http.Response, passedResponse *Response) error {
-	passedResponse.HTTPResponse = response
+func (connection *UAAConnection) populateResponse(response *http.Response, passedResponse shared.Response) error {
+	return passedResponse.PopulateFrom(response)
+	// passedResponse.HTTPResponse = response
 
-	rawBytes, err := ioutil.ReadAll(response.Body)
-	defer response.Body.Close()
-	if err != nil {
-		return err
-	}
-	passedResponse.RawResponse = rawBytes
+	// rawBytes, err := ioutil.ReadAll(response.Body)
+	// defer response.Body.Close()
+	// if err != nil {
+	// 	return err
+	// }
+	// passedResponse.RawResponse = rawBytes
 
-	err = connection.handleStatusCodes(response, passedResponse)
-	if err != nil {
-		return err
-	}
+	// err = connection.handleStatusCodes(response, passedResponse)
+	// if err != nil {
+	// 	return err
+	// }
 
-	if passedResponse.Result != nil {
-		decoder := json.NewDecoder(bytes.NewBuffer(passedResponse.RawResponse))
-		decoder.UseNumber()
-		err = decoder.Decode(passedResponse.Result)
-		if err != nil {
-			return err
-		}
-	}
+	// if passedResponse.Result != nil {
+	// 	decoder := json.NewDecoder(bytes.NewBuffer(passedResponse.RawResponse))
+	// 	decoder.UseNumber()
+	// 	err = decoder.Decode(passedResponse.Result)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
 
-	return nil
+	// return nil
 }
 
-func (connection *UAAConnection) processRequestErrors(request *http.Request, err error) error {
+func (connection *UAAConnection) processRequestErrors(request *shared.Request, err error) error {
 	switch e := err.(type) {
 	case *url.Error:
 		if _, ok := e.Err.(x509.UnknownAuthorityError); ok {

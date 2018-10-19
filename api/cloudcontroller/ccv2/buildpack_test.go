@@ -608,7 +608,7 @@ var _ = Describe("Buildpack", func() {
 		When("a retryable error occurs", func() {
 			BeforeEach(func() {
 				wrapper := &wrapper.CustomWrapper{
-					CustomMake: func(connection cloudcontroller.Connection, request *cloudcontroller.Request, response *cloudcontroller.Response) error {
+					CustomMake: func(connection shared.Connection, request *shared.Request, response *cloudcontroller.Response) error {
 						defer GinkgoRecover() // Since this will be running in a thread
 
 						if strings.HasSuffix(request.URL.String(), "/v2/buildpacks/some-buildpack-guid/bits") {
@@ -636,7 +636,7 @@ var _ = Describe("Buildpack", func() {
 				expectedErr = errors.New("some read error")
 
 				wrapper := &wrapper.CustomWrapper{
-					CustomMake: func(connection cloudcontroller.Connection, request *cloudcontroller.Request, response *cloudcontroller.Response) error {
+					CustomMake: func(connection shared.Connection, request *shared.Request, response *cloudcontroller.Response) error {
 						defer GinkgoRecover() // Since this will be running in a thread
 
 						if strings.HasSuffix(request.URL.String(), "/v2/buildpacks/some-buildpack-guid/bits") {

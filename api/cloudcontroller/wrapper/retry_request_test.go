@@ -35,7 +35,7 @@ var _ = Describe("Retry Request", func() {
 			expectedErr := ccerror.RawHTTPStatusError{
 				StatusCode: responseStatusCode,
 			}
-			fakeConnection.MakeStub = func(req *cloudcontroller.Request, passedResponse *cloudcontroller.Response) error {
+			fakeConnection.MakeStub = func(req *shared.Request, passedResponse *cloudcontroller.Response) error {
 				defer req.Body.Close()
 				body, readErr := ioutil.ReadAll(request.Body)
 				Expect(readErr).ToNot(HaveOccurred())
@@ -83,11 +83,11 @@ var _ = Describe("Retry Request", func() {
 	When("a PipeSeekError is returned from ResetBody", func() {
 		var (
 			expectedErr error
-			request     *cloudcontroller.Request
+			request     *shared.Request
 			response    *cloudcontroller.Response
 
 			fakeConnection *cloudcontrollerfakes.FakeConnection
-			wrapper        cloudcontroller.Connection
+			wrapper        shared.Connection
 		)
 
 		BeforeEach(func() {

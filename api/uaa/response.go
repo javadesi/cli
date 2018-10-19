@@ -15,7 +15,15 @@ type Response struct {
 	HTTPResponse *http.Response
 }
 
-func (r *Response) reset() {
+func (r *Response) Reset() {
 	r.RawResponse = []byte{}
 	r.HTTPResponse = nil
+}
+
+func (r *Response) PopulateFrom(httpResponse *http.Response) error {
+	return nil
+}
+
+func (r *Response) GetHTTPResponse() *http.Response {
+	panic("Not yet implemented")
 }

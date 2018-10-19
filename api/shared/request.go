@@ -1,4 +1,4 @@
-package cloudcontroller
+package shared
 
 import (
 	"io"

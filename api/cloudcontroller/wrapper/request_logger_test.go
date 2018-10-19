@@ -22,9 +22,9 @@ var _ = Describe("Request Logger", func() {
 		fakeConnection *cloudcontrollerfakes.FakeConnection
 		fakeOutput     *wrapperfakes.FakeRequestLoggerOutput
 
-		wrapper cloudcontroller.Connection
+		wrapper shared.Connection
 
-		request  *cloudcontroller.Request
+		request  *shared.Request
 		response *cloudcontroller.Response
 		makeErr  error
 	)

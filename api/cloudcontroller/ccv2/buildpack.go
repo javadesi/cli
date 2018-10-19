@@ -10,6 +10,7 @@ import (
 	"code.cloudfoundry.org/cli/api/cloudcontroller"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv2/internal"
+	"code.cloudfoundry.org/cli/api/shared"
 	"code.cloudfoundry.org/cli/types"
 )
 
@@ -239,7 +240,7 @@ func (*Client) createMultipartBodyAndHeaderForBuildpack(buildpack io.Reader, bpP
 	return form.FormDataContentType(), writerOutput, writeErrors
 }
 
-func (client *Client) uploadBuildpackAsynchronously(request *cloudcontroller.Request, writeErrors <-chan error) (Buildpack, Warnings, error) {
+func (client *Client) uploadBuildpackAsynchronously(request *shared.Request, writeErrors <-chan error) (Buildpack, Warnings, error) {
 
 	var buildpack Buildpack
 	response := cloudcontroller.Response{

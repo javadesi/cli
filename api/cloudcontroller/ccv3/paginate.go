@@ -4,9 +4,10 @@ import (
 	"net/http"
 
 	"code.cloudfoundry.org/cli/api/cloudcontroller"
+	"code.cloudfoundry.org/cli/api/shared"
 )
 
-func (client Client) paginate(request *cloudcontroller.Request, obj interface{}, appendToExternalList func(interface{}) error) (Warnings, error) {
+func (client Client) paginate(request *shared.Request, obj interface{}, appendToExternalList func(interface{}) error) (Warnings, error) {
 	fullWarningsList := Warnings{}
 
 	for {

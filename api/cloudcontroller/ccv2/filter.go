@@ -26,7 +26,7 @@ func (filter Filter) format() string {
 }
 
 // ConvertFilterParameters converts a Filter object into a collection that
-// cloudcontroller.Request can accept.
+// shared.Request can accept.
 func ConvertFilterParameters(filters []Filter) url.Values {
 	params := url.Values{"q": []string{}}
 	for _, filter := range filters {

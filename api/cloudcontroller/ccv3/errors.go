@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"code.cloudfoundry.org/cli/api/cloudcontroller"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
+	"code.cloudfoundry.org/cli/api/shared"
 )
 
 // errorWrapper is the wrapper that converts responses with 4xx and 5xx status
 // codes to an error.
 type errorWrapper struct {
-	connection cloudcontroller.Connection
+	connection shared.Connection
 }
 
 func newErrorWrapper() *errorWrapper {
@@ -20,7 +20,7 @@ func newErrorWrapper() *errorWrapper {
 
 // Make creates a connection in the wrapped connection and handles errors
 // that it returns.
-func (e *errorWrapper) Make(request *cloudcontroller.Request, passedResponse *cloudcontroller.Response) error {
+func (e *errorWrapper) Make(request *shared.Request, passedResponse shared.Response) error {
 	err := e.connection.Make(request, passedResponse)
 
 	if rawHTTPStatusErr, ok := err.(ccerror.RawHTTPStatusError); ok {
@@ -33,12 +33,12 @@ func (e *errorWrapper) Make(request *cloudcontroller.Request, passedResponse *cl
 }
 
 // Wrap wraps a Cloud Controller connection in this error handling wrapper.
-func (e *errorWrapper) Wrap(innerconnection cloudcontroller.Connection) cloudcontroller.Connection {
+func (e *errorWrapper) Wrap(innerconnection shared.Connection) shared.Connection {
 	e.connection = innerconnection
 	return e
 }
 
-func convert400(rawHTTPStatusErr ccerror.RawHTTPStatusError, request *cloudcontroller.Request) error {
+func convert400(rawHTTPStatusErr ccerror.RawHTTPStatusError, request *shared.Request) error {
 	firstErr, errorResponse, err := unmarshalFirstV3Error(rawHTTPStatusErr)
 	if err != nil {
 		return err
@@ -98,7 +98,7 @@ func convert500(rawHTTPStatusErr ccerror.RawHTTPStatusError) error {
 	}
 }
 
-func handleNotFound(errorResponse ccerror.V3Error, request *cloudcontroller.Request) error {
+func handleNotFound(errorResponse ccerror.V3Error, request *shared.Request) error {
 	switch errorResponse.Detail {
 	case "App not found":
 		return ccerror.ApplicationNotFoundError{}

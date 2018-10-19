@@ -3,6 +3,7 @@ package wrapper
 import (
 	"code.cloudfoundry.org/cli/api/cloudcontroller"
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
+	"code.cloudfoundry.org/cli/api/shared"
 	"code.cloudfoundry.org/cli/api/uaa"
 )
 
@@ -26,7 +27,7 @@ type TokenCache interface {
 // UAAAuthentication wraps connections and adds authentication headers to all
 // requests
 type UAAAuthentication struct {
-	connection cloudcontroller.Connection
+	connection shared.Connection
 	client     UAAClient
 	cache      TokenCache
 }
@@ -43,7 +44,7 @@ func NewUAAAuthentication(client UAAClient, cache TokenCache) *UAAAuthentication
 // Make adds authentication headers to the passed in request and then calls the
 // wrapped connection's Make. If the client is not set on the wrapper, it will
 // not add any header or handle any authentication errors.
-func (t *UAAAuthentication) Make(request *cloudcontroller.Request, passedResponse *cloudcontroller.Response) error {
+func (t *UAAAuthentication) Make(request *shared.Request, passedResponse *cloudcontroller.Response) error {
 	if t.client == nil {
 		return t.connection.Make(request, passedResponse)
 	}
@@ -82,7 +83,7 @@ func (t *UAAAuthentication) SetClient(client UAAClient) {
 }
 
 // Wrap sets the connection on the UAAAuthentication and returns itself
-func (t *UAAAuthentication) Wrap(innerconnection cloudcontroller.Connection) cloudcontroller.Connection {
+func (t *UAAAuthentication) Wrap(innerconnection shared.Connection) shared.Connection {
 	t.connection = innerconnection
 	return t
 }
