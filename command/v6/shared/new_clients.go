@@ -100,7 +100,7 @@ func NewRouterClient(config command.Config, ui command.UI, uaaClient *uaa.Client
 	verbose, location := config.Verbose()
 
 	if verbose {
-		routerWrappers = append(routerWrappers, router.ConnectionWrapper(ccWrapper.NewRequestLogger(ui.RequestLoggerTerminalDisplay())))
+		routerWrappers = append(routerWrappers, router.ConnectionWrapper(routerWrapper.NewRequestLogger(ui.RequestLoggerTerminalDisplay())))
 	}
 
 	if location != nil {

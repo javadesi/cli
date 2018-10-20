@@ -476,9 +476,26 @@ var _ = Describe("Verbose", func() {
 	})
 
 	FDescribe("routing", func() {
+		When("the user does not provide the -v flag, the CF_TRACE env var, or the --trace config option", func() {
+			It("should not log requests", func() {
+				tmpDir, err := ioutil.TempDir("", "")
+				defer os.RemoveAll(tmpDir)
+				Expect(err).NotTo(HaveOccurred())
+
+				helpers.LoginCF()
+				helpers.TargetOrgAndSpace(ReadOnlyOrg, ReadOnlySpace)
+
+				command := []string{"create-shared-domain", helpers.NewDomainName(), "--router-group", "default-tcp"}
+
+				session := helpers.CF(command...)
+
+				Consistently(session).ShouldNot(Say(`GET /routing/v1`))
+				Eventually(session).Should(Exit(0))
+			})
+		})
+
 		DescribeTable("router client",
 			func(env string, configTrace string, flag bool) {
-
 				tmpDir, err := ioutil.TempDir("", "")
 				defer os.RemoveAll(tmpDir)
 				Expect(err).NotTo(HaveOccurred())
@@ -510,36 +527,26 @@ var _ = Describe("Verbose", func() {
 
 				session := helpers.CFWithEnv(envMap, command...)
 
-				// Eventually(session).Should(Say("REQUEST:"))
-				Eventually(session).Should(Say("GET /routing/v1/router_groups"))
-				// Eventually(session).Should(Say("GET /routing/v1/router_groups?name=some-router-group"))
-				// Eventually(session).Should(Say("RESPONSE:"))
-				// Eventually(session).Should(Say(`"token_endpoint": "http.*"`))
-				// Eventually(session).Should(Say("REQUEST:"))
-				// Eventually(session).Should(Say("POST /Users"))
-				// Eventually(session).Should(Say("User-Agent: cf/[\\w.+-]+ \\(go\\d+\\.\\d+(\\.\\d+)?; %s %s\\)", runtime.GOARCH, runtime.GOOS))
-				// Eventually(session).Should(Say("RESPONSE:"))
-				// Eventually(session).Should(Say("REQUEST:"))
-				// Eventually(session).Should(Say("POST /v2/users"))
-				// Eventually(session).Should(Say("User-Agent: cf/[\\w.+-]+ \\(go\\d+\\.\\d+(\\.\\d+)?; %s %s\\)", runtime.GOARCH, runtime.GOOS))
-				// Eventually(session).Should(Say("RESPONSE:"))
-				// Eventually(session).Should(Exit(0))
+				Eventually(session).Should(Say(`GET /routing/v1/router_groups\?name=default-tcp`))
+				Eventually(session).Should(Exit(0))
 			},
 
-			// Entry("CF_TRACE true: enables verbose", "true", "", false),
-			// Entry("CF_TRACE true, config trace false: enables verbose", "true", "false", false),
-			// Entry("CF_TRACE true, config trace file path: enables verbose AND logging to file", "true", "/foo", false),
+			// TODO: these tests don't actually test writing to a particular file.
 
-			// Entry("CF_TRACE false, '-v': enables verbose", "false", "", true),
-			// Entry("CF_TRACE false, config trace file path, '-v': enables verbose AND logging to file", "false", "/foo", true),
+			Entry("CF_TRACE true: enables verbose", "true", "", false),
+			Entry("CF_TRACE true, config trace false: enables verbose", "true", "false", false),
+			Entry("CF_TRACE true, config trace file path: enables verbose AND logging to file", "true", "/foo", false),
+
+			Entry("CF_TRACE false, '-v': enables verbose", "false", "", true),
+			Entry("CF_TRACE false, config trace file path, '-v': enables verbose AND logging to file", "false", "/foo", true),
 
 			Entry("CF_TRACE empty:, '-v': enables verbose", "", "", true),
-			// Entry("CF_TRACE empty, config trace true: enables verbose", "", "true", false),
-			// Entry("CF_TRACE empty, config trace file path, '-v': enables verbose AND logging to file", "", "/foo", true),
+			Entry("CF_TRACE empty, config trace true: enables verbose", "", "true", false),
+			Entry("CF_TRACE empty, config trace file path, '-v': enables verbose AND logging to file", "", "/foo", true),
 
-			// Entry("CF_TRACE filepath, '-v': enables logging to file", "/foo", "", true),
-			// Entry("CF_TRACE filepath, config trace true: enables verbose AND logging to file", "/foo", "true", false),
-			// Entry("CF_TRACE filepath, config trace filepath, '-v': enables verbose AND logging to file for BOTH paths", "/foo", "/bar", true),
+			Entry("CF_TRACE filepath, '-v': enables logging to file", "/foo", "", true),
+			Entry("CF_TRACE filepath, config trace true: enables verbose AND logging to file", "/foo", "true", false),
+			Entry("CF_TRACE filepath, config trace filepath, '-v': enables verbose AND logging to file for BOTH paths", "/foo", "/bar", true),
 		)
 	})
 })

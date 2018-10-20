@@ -14,7 +14,7 @@ type RouterGroup struct {
 	ReservablePorts string `json:"reservable_ports"`
 }
 
-// GetRouterGroups returns a list of RouterGroups
+// GetRouterGroupsByName returns a list of RouterGroups
 func (client *Client) GetRouterGroupsByName(name string) ([]RouterGroup, error) {
 	request, err := client.newHTTPRequest(requestOptions{
 		RequestName: internal.GetRouterGroups,
