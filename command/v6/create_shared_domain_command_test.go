@@ -105,8 +105,7 @@ var _ = Describe("CreateSharedDomainCommand", func() {
 
 			When("--router-group is not passed", func() {
 				BeforeEach(func() {
-					cmd.RouterGroup = ""
-					cmd.RequiredArgs = flag.Domain{Domain: "some-domain"}
+					routerGroupName = ""
 				})
 
 				It("does not call fetch the router group", func() {

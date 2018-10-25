@@ -100,11 +100,11 @@ func NewRouterClient(config command.Config, ui command.UI, uaaClient *uaa.Client
 	verbose, location := config.Verbose()
 
 	if verbose {
-		routerWrappers = append(routerWrappers, router.ConnectionWrapper(routerWrapper.NewRequestLogger(ui.RequestLoggerTerminalDisplay())))
+		routerWrappers = append(routerWrappers, routerWrapper.NewRequestLogger(ui.RequestLoggerTerminalDisplay()))
 	}
 
 	if location != nil {
-		// routerWrappers = append(routerWrappers, ccWrapper.NewRequestLogger(ui.RequestLoggerFileWriter(location)))
+		routerWrappers = append(routerWrappers, routerWrapper.NewRequestLogger(ui.RequestLoggerFileWriter(location)))
 	}
 
 	authWrapper := routerWrapper.NewUAAAuthentication(nil, config)
