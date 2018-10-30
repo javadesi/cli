@@ -73,6 +73,42 @@ func (c *cliConnection) CliCommand(args ...string) ([]string, error) {
 	return c.callCliCommand(false, args...)
 }
 
+func (c *cliConnection) CliCommandNewVersion(args ...string) ([]string, error) {
+	var (
+		success                  bool
+		cmdOutput                []string
+		callCoreCommandErr       error
+		getOutputAndResetErr     error
+		disableTerminalOutputErr error
+	)
+
+	c.withClientDo(func(client *rpc.Client) error {
+		disableTerminalOutputErr = client.Call("CliRpcCmd.DisableTerminalOutput", false, &success)
+		callCoreCommandErr = client.Call("CliRpcCmd.CallCoreCommandNewVersion", args, &success)
+		getOutputAndResetErr = client.Call("CliRpcCmd.GetOutputAndReset", success, &cmdOutput)
+
+		return nil
+	})
+
+	if disableTerminalOutputErr != nil {
+		return []string{}, disableTerminalOutputErr
+	}
+
+	if callCoreCommandErr != nil {
+		return []string{}, callCoreCommandErr
+	}
+
+	if !success {
+		return []string{}, errors.New("Error executing cli core command")
+	}
+
+	if getOutputAndResetErr != nil {
+		return []string{}, errors.New("something completely unexpected happened")
+	}
+
+	return cmdOutput, nil
+}
+
 func (c *cliConnection) callCliCommand(silently bool, args ...string) ([]string, error) {
 	var (
 		success                  bool

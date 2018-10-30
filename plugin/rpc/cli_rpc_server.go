@@ -1,6 +1,8 @@
 package rpc
 
 import (
+	"errors"
+	"io/ioutil"
 	"os"
 	"strings"
 
@@ -8,10 +10,17 @@ import (
 	"code.cloudfoundry.org/cli/cf/commandregistry"
 	"code.cloudfoundry.org/cli/cf/configuration/coreconfig"
 	"code.cloudfoundry.org/cli/cf/terminal"
+	"code.cloudfoundry.org/cli/command"
+	"code.cloudfoundry.org/cli/command/common"
+	"code.cloudfoundry.org/cli/command/translatableerror"
 	"code.cloudfoundry.org/cli/plugin"
 	"code.cloudfoundry.org/cli/plugin/models"
+	"code.cloudfoundry.org/cli/util/configv3"
+	"code.cloudfoundry.org/cli/util/ui"
 	"code.cloudfoundry.org/cli/version"
 	"github.com/blang/semver"
+	flags "github.com/jessevdk/go-flags"
+	log "github.com/sirupsen/logrus"
 
 	"fmt"
 	"net"
@@ -163,13 +172,74 @@ func (cmd *CliRpcCmd) SetPluginMetadata(pluginMetadata plugin.PluginMetadata, re
 	return nil
 }
 
+// Used for calling arbitrary commands
 func (cmd *CliRpcCmd) DisableTerminalOutput(disable bool, retVal *bool) error {
 	cmd.terminalOutputSwitch.DisableTerminalOutput(disable)
 	*retVal = true
 	return nil
 }
 
+type TeeWriter struct {
+	out1 io.Writer
+	out2 io.Writer
+}
+
+func (w *TeeWriter) Write(p []byte) (int, error) {
+	return 0, nil
+}
+
+func (rpcCommand *CliRpcCmd) generateExecutionWrapper() func(command flags.Commander, args []string) error {
+	return func(cmd flags.Commander, args []string) error {
+
+		cfConfig, configErr := configv3.LoadConfig(configv3.FlagOverride{
+			Verbose: common.Commands.VerboseOrVersion,
+		})
+		if configErr != nil {
+			if _, ok := configErr.(translatableerror.EmptyConfigError); !ok {
+				return configErr
+			}
+		}
+		var empty []byte
+		in := bytes.NewBuffer(empty)
+
+		commandUI := ui.NewTestUI(in, rpcCommand.outputBucket, ioutil.Discard)
+
+		if extendedCmd, ok := cmd.(command.ExtendedCommander); ok {
+			log.SetOutput(os.Stderr)
+			log.SetLevel(log.Level(cfConfig.LogLevel()))
+
+			err := extendedCmd.Setup(cfConfig, commandUI)
+			if err != nil {
+				return err
+			}
+			return extendedCmd.Execute(args)
+		}
+
+		return fmt.Errorf("command does not conform to ExtendedCommander")
+	}
+
+}
+
+func (cmd *CliRpcCmd) CallCoreCommandNewVersion(args []string, retVal *bool) error {
+	commandList := common.Commands
+
+	cmd.outputBucket = &bytes.Buffer{}
+	//TODO new version
+	cmd.outputCapture.SetOutputBucket(cmd.outputBucket)
+
+	if commandList.HasCommand(args[0]) {
+		parser := flags.NewParser(&commandList, flags.HelpFlag)
+		parser.CommandHandler = cmd.generateExecutionWrapper()
+		_, err := parser.ParseArgs(args)
+		*retVal = err == nil
+		return err
+	}
+	*retVal = false
+	return errors.New("Unknown command " + args[0])
+}
+
 func (cmd *CliRpcCmd) CallCoreCommand(args []string, retVal *bool) error {
+	// return cmd.CallCoreCommandNewVersion(args, retVal)
 	var err error
 	cmdRegistry := commandregistry.Commands
 

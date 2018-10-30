@@ -23,6 +23,8 @@ import (
 	"code.cloudfoundry.org/cli/cf/util/spellcheck"
 	"code.cloudfoundry.org/cli/plugin/rpc"
 
+	// "code.cloudfoundry.org/cli/plugin/rpc"
+
 	netrpc "net/rpc"
 )
 

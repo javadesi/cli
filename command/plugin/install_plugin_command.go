@@ -1,4 +1,4 @@
-package common
+package plugin
 
 import (
 	"io/ioutil"
@@ -113,8 +113,8 @@ func (cmd InstallPluginCommand) Execute([]string) error {
 		return err
 	}
 	log.Info("validated plugin")
-
-	if installedPlugin, installed := cmd.Config.GetPluginCaseInsensitive(plugin.Name); installed {
+	installedPlugin, installed := cmd.Config.GetPluginCaseInsensitive(plugin.Name)
+	if installed {
 		log.WithField("version", installedPlugin.Version).Debug("uninstall plugin")
 
 		if !cmd.Force && pluginSource != PluginFromRepository {

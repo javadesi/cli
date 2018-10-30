@@ -45,6 +45,7 @@ type CliConnection interface {
 	GetService(string) (plugin_models.GetService_Model, error)
 	GetOrg(string) (plugin_models.GetOrg_Model, error)
 	GetSpace(string) (plugin_models.GetSpace_Model, error)
+	CliCommandNewVersion(args ...string) ([]string, error)
 }
 
 type VersionType struct {

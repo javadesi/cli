@@ -43,7 +43,10 @@ func (pluginDemo *PluginDemonstratingParams) Run(cliConnection plugin.CliConnect
 			itemToEcho += value + " "
 		}
 	}
-
+	strs, err := cliConnection.CliCommandNewVersion("push", "dora", "-p", "/home/pivotal/workspace/cf-acceptance-tests/assets/dora")
+	for _, str := range strs {
+		println("FROM PLUGIN:", str)
+	}
 	fmt.Println(itemToEcho)
 }
 

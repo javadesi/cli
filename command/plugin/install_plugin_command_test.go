@@ -1,4 +1,4 @@
-package common_test
+package plugin_test
 
 import (
 	"errors"
