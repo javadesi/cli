@@ -579,25 +579,30 @@ var _ = Describe("Process", func() {
 		})
 	})
 
-	Describe("PatchApplicationProcessHealthCheck", func() {
+	Describe("UpdateProcess", func() {
 		var (
-			endpoint          string
-			invocationTimeout int
+			inputProcess Process
 
 			process  Process
 			warnings []string
 			err      error
 		)
 
+		BeforeEach(func() {
+			inputProcess = Process{
+				GUID:            "some-process-guid",
+				HealthCheckType: "some-type",
+			}
+		})
+
 		JustBeforeEach(func() {
-			process, warnings, err = client.PatchApplicationProcessHealthCheck("some-process-guid", "some-type", endpoint, invocationTimeout)
+			process, warnings, err = client.UpdateProcess(inputProcess)
 		})
 
 		When("patching the process succeeds", func() {
 			Context("and the endpoint is set", func() {
 				BeforeEach(func() {
-					endpoint = "some-endpoint"
-					invocationTimeout = 0
+					inputProcess.HealthCheckEndpoint = "some-endpoint"
 
 					expectedBody := `{
 					"health_check": {
@@ -637,8 +642,7 @@ var _ = Describe("Process", func() {
 
 			Context("and invocation timeout is set", func() {
 				BeforeEach(func() {
-					endpoint = ""
-					invocationTimeout = 42
+					inputProcess.HealthCheckInvocationTimeout = 42
 
 					expectedBody := `{
 					"health_check": {
@@ -680,9 +684,6 @@ var _ = Describe("Process", func() {
 
 			Context("and the endpoint and timeout are not set", func() {
 				BeforeEach(func() {
-					endpoint = ""
-					invocationTimeout = 0
-
 					expectedBody := `{
 					"health_check": {
 						"type": "some-type",
@@ -721,7 +722,6 @@ var _ = Describe("Process", func() {
 
 		When("the process does not exist", func() {
 			BeforeEach(func() {
-				endpoint = "some-endpoint"
 				response := `{
 					"errors": [
 						{
@@ -748,7 +748,6 @@ var _ = Describe("Process", func() {
 
 		When("the cloud controller returns errors and warnings", func() {
 			BeforeEach(func() {
-				endpoint = "some-endpoint"
 				response := `{
 						"errors": [
 							{

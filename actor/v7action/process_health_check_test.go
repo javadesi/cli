@@ -254,7 +254,7 @@ var _ = Describe("Process Health Check Actions", func() {
 					healthCheckEndpoint = constant.ProcessHealthCheckEndpointDefault
 
 					expectedErr = errors.New("some-error")
-					fakeCloudControllerClient.PatchApplicationProcessHealthCheckReturns(
+					fakeCloudControllerClient.UpdateProcessReturns(
 						ccv3.Process{},
 						ccv3.Warnings{"some-health-check-warning"},
 						expectedErr,
@@ -269,7 +269,7 @@ var _ = Describe("Process Health Check Actions", func() {
 
 			When("setting process health check type succeeds", func() {
 				BeforeEach(func() {
-					fakeCloudControllerClient.PatchApplicationProcessHealthCheckReturns(
+					fakeCloudControllerClient.UpdateProcessReturns(
 						ccv3.Process{GUID: "some-process-guid"},
 						ccv3.Warnings{"some-health-check-warning"},
 						nil,
@@ -296,12 +296,12 @@ var _ = Describe("Process Health Check Actions", func() {
 						Expect(err).NotTo(HaveOccurred())
 						Expect(warnings).To(ConsistOf("some-process-warning", "some-health-check-warning"))
 
-						Expect(fakeCloudControllerClient.PatchApplicationProcessHealthCheckCallCount()).To(Equal(1))
-						processGUID, processHealthCheckType, processHealthCheckEndpoint, processInvocationTimeout := fakeCloudControllerClient.PatchApplicationProcessHealthCheckArgsForCall(0)
-						Expect(processGUID).To(Equal("some-process-guid"))
-						Expect(processHealthCheckType).To(Equal("http"))
-						Expect(processHealthCheckEndpoint).To(Equal("some-http-endpoint"))
-						Expect(processInvocationTimeout).To(Equal(42))
+						Expect(fakeCloudControllerClient.UpdateProcessCallCount()).To(Equal(1))
+						process := fakeCloudControllerClient.UpdateProcessArgsForCall(0)
+						Expect(process.GUID).To(Equal("some-process-guid"))
+						Expect(process.HealthCheckType).To(Equal("http"))
+						Expect(process.HealthCheckEndpoint).To(Equal("some-http-endpoint"))
+						Expect(process.HealthCheckInvocationTimeout).To(Equal(42))
 					})
 				})
 
@@ -320,12 +320,12 @@ var _ = Describe("Process Health Check Actions", func() {
 							Expect(err).NotTo(HaveOccurred())
 							Expect(warnings).To(ConsistOf("some-process-warning", "some-health-check-warning"))
 
-							Expect(fakeCloudControllerClient.PatchApplicationProcessHealthCheckCallCount()).To(Equal(1))
-							processGUID, processHealthCheckType, processHealthCheckEndpoint, processInvocationTimeout := fakeCloudControllerClient.PatchApplicationProcessHealthCheckArgsForCall(0)
-							Expect(processGUID).To(Equal("some-process-guid"))
-							Expect(processHealthCheckType).To(Equal("port"))
-							Expect(processHealthCheckEndpoint).To(BeEmpty())
-							Expect(processInvocationTimeout).To(Equal(42))
+							Expect(fakeCloudControllerClient.UpdateProcessCallCount()).To(Equal(1))
+							process := fakeCloudControllerClient.UpdateProcessArgsForCall(0)
+							Expect(process.GUID).To(Equal("some-process-guid"))
+							Expect(process.HealthCheckType).To(Equal("port"))
+							Expect(process.HealthCheckEndpoint).To(BeEmpty())
+							Expect(process.HealthCheckInvocationTimeout).To(Equal(42))
 						})
 					})
 
@@ -338,12 +338,12 @@ var _ = Describe("Process Health Check Actions", func() {
 							Expect(err).NotTo(HaveOccurred())
 							Expect(warnings).To(ConsistOf("some-process-warning", "some-health-check-warning"))
 
-							Expect(fakeCloudControllerClient.PatchApplicationProcessHealthCheckCallCount()).To(Equal(1))
-							processGUID, processHealthCheckType, processHealthCheckEndpoint, processInvocationTimeout := fakeCloudControllerClient.PatchApplicationProcessHealthCheckArgsForCall(0)
-							Expect(processGUID).To(Equal("some-process-guid"))
-							Expect(processHealthCheckType).To(Equal("port"))
-							Expect(processHealthCheckEndpoint).To(BeEmpty())
-							Expect(processInvocationTimeout).To(Equal(42))
+							Expect(fakeCloudControllerClient.UpdateProcessCallCount()).To(Equal(1))
+							process := fakeCloudControllerClient.UpdateProcessArgsForCall(0)
+							Expect(process.GUID).To(Equal("some-process-guid"))
+							Expect(process.HealthCheckType).To(Equal("port"))
+							Expect(process.HealthCheckEndpoint).To(BeEmpty())
+							Expect(process.HealthCheckInvocationTimeout).To(Equal(42))
 						})
 					})
 				})
