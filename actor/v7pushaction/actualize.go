@@ -70,12 +70,13 @@ func (actor Actor) Actualize(state PushState, progressBar ProgressBar) (
 		if state.Overrides.HealthCheckType != "" {
 			log.WithField("health_check_type", state.Overrides.HealthCheckType).Info("Setting Web Process's Health Check Type")
 			eventStream <- SetHealthCheck
-			warnings, err := actor.V7Actor.SetProcessHealthCheckByProcessTypeAndApplication(
+			warnings, err := actor.V7Actor.UpdateProcessByTypeAndApplication(
 				constant.ProcessTypeWeb,
 				state.Application.GUID,
-				state.Overrides.HealthCheckType,
-				constant.ProcessHealthCheckEndpointDefault,
-				0)
+				v7action.Process{
+					HealthCheckType:     state.Overrides.HealthCheckType,
+					HealthCheckEndpoint: constant.ProcessHealthCheckEndpointDefault,
+				})
 			warningsStream <- Warnings(warnings)
 			if err != nil {
 				errorStream <- err

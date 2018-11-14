@@ -323,7 +323,7 @@ var _ = Describe("Actualize", func() {
 						},
 						v7action.Warnings{"some-app-update-warnings"},
 						nil)
-					fakeV7Actor.SetProcessHealthCheckByProcessTypeAndApplicationReturns(v7action.Warnings{"health-check-warnings"}, nil)
+					fakeV7Actor.UpdateProcessByTypeAndApplicationReturns(v7action.Warnings{"health-check-warnings"}, nil)
 				})
 
 				It("returns warnings and continues", func() {
@@ -331,13 +331,16 @@ var _ = Describe("Actualize", func() {
 					Eventually(warningsStream).Should(Receive(ConsistOf("health-check-warnings")))
 					Eventually(getNextEvent(stateStream, eventStream, warningsStream)).Should(Equal(SetHealthCheckComplete))
 
-					Expect(fakeV7Actor.SetProcessHealthCheckByProcessTypeAndApplicationCallCount()).To(Equal(1))
-					passedProcessType, passedAppGUID, passedHealthCheckType, passedHTTPEndpoint, passedInvocationTimeout := fakeV7Actor.SetProcessHealthCheckByProcessTypeAndApplicationArgsForCall(0)
+					Expect(fakeV7Actor.UpdateProcessByTypeAndApplicationCallCount()).To(Equal(1))
+					passedProcessType, passedAppGUID, passedProcess := fakeV7Actor.UpdateProcessByTypeAndApplicationArgsForCall(0)
 					Expect(passedProcessType).To(Equal(constant.ProcessTypeWeb))
 					Expect(passedAppGUID).To(Equal("some-app-guid"))
-					Expect(passedHealthCheckType).To(Equal(healthCheckType))
-					Expect(passedHTTPEndpoint).To(Equal(constant.ProcessHealthCheckEndpointDefault))
-					Expect(passedInvocationTimeout).To(BeZero())
+					Expect(passedProcess).To(MatchFields(IgnoreExtras,
+						Fields{
+							"HealthCheckType":              Equal(healthCheckType),
+							"HealthCheckEndpoint":          Equal(constant.ProcessHealthCheckEndpointDefault),
+							"HealthCheckInvocationTimeout": BeZero(),
+						}))
 				})
 			})
 
@@ -345,7 +348,7 @@ var _ = Describe("Actualize", func() {
 				var expectedErr error
 				BeforeEach(func() {
 					expectedErr = errors.New("nopes")
-					fakeV7Actor.SetProcessHealthCheckByProcessTypeAndApplicationReturns(v7action.Warnings{"health-check-warnings"}, expectedErr)
+					fakeV7Actor.UpdateProcessByTypeAndApplicationReturns(v7action.Warnings{"health-check-warnings"}, expectedErr)
 				})
 
 				It("returns warnings and an error", func() {
@@ -360,7 +363,7 @@ var _ = Describe("Actualize", func() {
 		When("a health check override is not provided", func() {
 			It("should not set the health check", func() {
 				Consistently(getNextEvent(stateStream, eventStream, warningsStream)).ShouldNot(Equal(SetHealthCheck))
-				Consistently(fakeV7Actor.SetProcessHealthCheckByProcessTypeAndApplicationCallCount).Should(Equal(0))
+				Consistently(fakeV7Actor.UpdateProcessByTypeAndApplicationCallCount).Should(Equal(0))
 			})
 		})
 	})
