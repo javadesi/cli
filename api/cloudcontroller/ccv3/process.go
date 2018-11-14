@@ -34,6 +34,7 @@ func (p Process) MarshalJSON() ([]byte, error) {
 	}
 
 	var ccProcess struct {
+		Command    string      `json:"command,omitempty"`
 		Instances  json.Number `json:"instances,omitempty"`
 		MemoryInMB json.Number `json:"memory_in_mb,omitempty"`
 		DiskInMB   json.Number `json:"disk_in_mb,omitempty"`
@@ -41,6 +42,7 @@ func (p Process) MarshalJSON() ([]byte, error) {
 		HealthCheck *healthCheck `json:"health_check,omitempty"`
 	}
 
+	ccProcess.Command = p.Command
 	if p.Instances.IsSet {
 		ccProcess.Instances = json.Number(fmt.Sprint(p.Instances.Value))
 	}
@@ -176,6 +178,7 @@ func (client *Client) GetApplicationProcesses(appGUID string) ([]Process, Warnin
 // settings.
 func (client *Client) UpdateProcess(process Process) (Process, Warnings, error) {
 	body, err := json.Marshal(Process{
+		Command:                      process.Command,
 		HealthCheckType:              process.HealthCheckType,
 		HealthCheckEndpoint:          process.HealthCheckEndpoint,
 		HealthCheckInvocationTimeout: process.HealthCheckInvocationTimeout,
