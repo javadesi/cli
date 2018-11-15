@@ -13,6 +13,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega/gstruct"
 )
 
 var _ = Describe("Process Actions", func() {
@@ -244,7 +245,7 @@ var _ = Describe("Process Actions", func() {
 				)
 			})
 
-			When("setting process health check type returns an error", func() {
+			When("updating the process errors", func() {
 				var expectedErr error
 
 				BeforeEach(func() {
@@ -265,7 +266,7 @@ var _ = Describe("Process Actions", func() {
 				})
 			})
 
-			When("setting process health check type succeeds", func() {
+			When("update the process is successful", func() {
 				BeforeEach(func() {
 					fakeCloudControllerClient.UpdateProcessReturns(
 						ccv3.Process{GUID: "some-process-guid"},
@@ -283,6 +284,25 @@ var _ = Describe("Process Actions", func() {
 					Expect(passedProcessType).To(Equal(processType))
 				})
 
+				When("updating the command is successful", func() {
+					BeforeEach(func() {
+						inputProcess.Command = "some-command"
+					})
+
+					It("returns the application", func() {
+						Expect(err).NotTo(HaveOccurred())
+						Expect(warnings).To(ConsistOf("some-process-warning", "some-health-check-warning"))
+
+						Expect(fakeCloudControllerClient.UpdateProcessCallCount()).To(Equal(1))
+						process := fakeCloudControllerClient.UpdateProcessArgsForCall(0)
+						Expect(process).To(MatchFields(IgnoreExtras,
+							Fields{
+								"GUID":    Equal("some-process-guid"),
+								"Command": Equal("some-command"),
+							}))
+					})
+				})
+
 				When("the health check type is http", func() {
 					BeforeEach(func() {
 						inputProcess.HealthCheckType = "http"
@@ -296,10 +316,13 @@ var _ = Describe("Process Actions", func() {
 
 						Expect(fakeCloudControllerClient.UpdateProcessCallCount()).To(Equal(1))
 						process := fakeCloudControllerClient.UpdateProcessArgsForCall(0)
-						Expect(process.GUID).To(Equal("some-process-guid"))
-						Expect(process.HealthCheckType).To(Equal("http"))
-						Expect(process.HealthCheckEndpoint).To(Equal("some-http-endpoint"))
-						Expect(process.HealthCheckInvocationTimeout).To(Equal(42))
+						Expect(process).To(MatchFields(IgnoreExtras,
+							Fields{
+								"GUID":                         Equal("some-process-guid"),
+								"HealthCheckType":              Equal("http"),
+								"HealthCheckEndpoint":          Equal("some-http-endpoint"),
+								"HealthCheckInvocationTimeout": Equal(42),
+							}))
 					})
 				})
 
@@ -320,10 +343,13 @@ var _ = Describe("Process Actions", func() {
 
 							Expect(fakeCloudControllerClient.UpdateProcessCallCount()).To(Equal(1))
 							process := fakeCloudControllerClient.UpdateProcessArgsForCall(0)
-							Expect(process.GUID).To(Equal("some-process-guid"))
-							Expect(process.HealthCheckType).To(Equal("port"))
-							Expect(process.HealthCheckEndpoint).To(BeEmpty())
-							Expect(process.HealthCheckInvocationTimeout).To(Equal(42))
+							Expect(process).To(MatchFields(IgnoreExtras,
+								Fields{
+									"GUID":                         Equal("some-process-guid"),
+									"HealthCheckType":              Equal("port"),
+									"HealthCheckEndpoint":          BeEmpty(),
+									"HealthCheckInvocationTimeout": Equal(42),
+								}))
 						})
 					})
 
@@ -334,10 +360,13 @@ var _ = Describe("Process Actions", func() {
 
 							Expect(fakeCloudControllerClient.UpdateProcessCallCount()).To(Equal(1))
 							process := fakeCloudControllerClient.UpdateProcessArgsForCall(0)
-							Expect(process.GUID).To(Equal("some-process-guid"))
-							Expect(process.HealthCheckType).To(Equal("port"))
-							Expect(process.HealthCheckEndpoint).To(BeEmpty())
-							Expect(process.HealthCheckInvocationTimeout).To(Equal(42))
+							Expect(process).To(MatchFields(IgnoreExtras,
+								Fields{
+									"GUID":                         Equal("some-process-guid"),
+									"HealthCheckType":              Equal("port"),
+									"HealthCheckEndpoint":          BeEmpty(),
+									"HealthCheckInvocationTimeout": Equal(42),
+								}))
 						})
 					})
 				})
